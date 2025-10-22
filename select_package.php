@@ -23,7 +23,7 @@ if ($num_clients <= 5) {
 $_SESSION['price_range_auto'] = $price_range;
 
 // Get event type from previous session step (e.g. "Wedding", "Debut", etc.)
-$event_type = $_SESSION['preferred_event'] ?? 'Others';
+$event_type = $_GET['event_type'] ?? ($_SESSION['preferred_event'] ?? 'Others');
 
 // Fetch matching packages
 $stmt = $conn->prepare("SELECT * FROM packages WHERE event_type = ? AND price_range = ?");
@@ -185,6 +185,8 @@ $result = $stmt->get_result();
             </p>
 
             <form action="final_submit.php" method="POST" class="space-y-6">
+<input type="hidden" name="booking_id" value="<?= (int)($_SESSION['booking_id'] ?? 0) ?>">
+
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <div class="bg-lavender-50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all border border-lavender-100">
                         <label class="flex items-start space-x-4 cursor-pointer">

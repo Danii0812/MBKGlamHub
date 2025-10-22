@@ -44,6 +44,7 @@ if ($result && $row = $result->fetch_assoc()) {
                 "admin_dashboard.php" => ["Dashboard", "fa-home"],
                 "admin_manage_bookings.php" => ["Manage Bookings", "fa-calendar-check"],
                 "admin_manage_teams.php" => ["Manage Teams", "fa-users"],
+                "admin_manage_artists.php" => ["Manage Artists", "fa-users"],
                 "admin_manage_packages.php" => ["Manage Packages", "fa-box-open"],
                 "admin_reports.php" => ["Reports", "fa-chart-line"],
                 "admin_site_settings.php" => ["Site Settings", "fa-cog"],
