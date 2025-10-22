@@ -9,6 +9,10 @@ $greetingName = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'Guest'
 // Get team_id from URL
 $team_id = $_GET['team_id'] ?? null;
 
+// Store booking id in session for final submit
+$booking_id = isset($_GET['booking_id']) ? (int)$_GET['booking_id'] : null;
+if ($booking_id) { $_SESSION['booking_id'] = $booking_id; }
+
 // ✅ Extract values from session to use in logic
 $selected_date = $_SESSION['selected_date'] ?? null;
 $selected_time = $_SESSION['selected_time'] ?? null;

@@ -13,6 +13,11 @@ if ($conn->connect_error) {
 
 $confirmed = false;
 
+// Ensure booking id is available from POST fallback
+if (!isset($_SESSION['booking_id']) && isset($_POST['booking_id'])) {
+    $_SESSION['booking_id'] = (int)$_POST['booking_id'];
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $team_id = $_SESSION['selected_team_id'] ?? null; // Use session team_id if available
     if (isset($_POST['team_id'])) { // Fallback to POST if session not set (e.g., direct access)
