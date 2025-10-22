@@ -78,9 +78,11 @@ $query = "
         bookings.*, 
         users.first_name, 
         users.middle_name, 
-        users.last_name 
+        users.last_name,
+        packages.name
     FROM bookings 
-    JOIN users ON bookings.user_id = users.user_id 
+    JOIN users ON bookings.user_id = users.user_id
+    LEFT JOIN packages ON bookings.package_id = packages.package_id
     $whereSql
     ORDER BY booking_date DESC, booking_time DESC
 ";
@@ -248,11 +250,19 @@ $bookings = $conn->query($query);
                     <tbody class="divide-y divide-lavender-200">
                         <?php while ($row = $bookings->fetch_assoc()): ?>
                             <tr class="hover:bg-lavender-50">
-                                <td class="px-6 py-4">
-    <?= htmlspecialchars($row['first_name'] . 
-        (!empty($row['middle_name']) ? ' ' . $row['middle_name'] : '') . 
-        ' ' . $row['last_name']) ?>
+<td class="px-6 py-4">
+    <div class="font-semibold">
+        <?= htmlspecialchars($row['first_name'] . 
+            (!empty($row['middle_name']) ? ' ' . $row['middle_name'] : '') . 
+            ' ' . $row['last_name']) ?>
+    </div>
+    <?php if (!empty($row['name'])): ?>
+        <div class="text-sm text-gray-500">
+            <?= htmlspecialchars($row['name']) ?>
+        </div>
+    <?php endif; ?>
 </td>
+
 
                                 <td class="px-6 py-4">
                                     <?= date("F j, Y", strtotime($row['booking_date'])) ?> <!-- Example: July 16, 2025 -->
