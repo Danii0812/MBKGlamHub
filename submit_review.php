@@ -48,15 +48,20 @@ if ($chkRes->num_rows > 0) respondError('Review already submitted for this booki
 // classify sentiment (uses training_data table if available; falls back to lexicon)
 $sentiment = classifySentiment($comment, $conn);
 
-// insert review with is_verified = 0
-$ins = $conn->prepare("INSERT INTO reviews (booking_id, user_id, rating, comment, sentiment, is_verified) VALUES (?, ?, ?, ?, ?, 0)");
-$ins->bind_param('iiiss', $booking_id, $user_id, $rating, $comment, $sentiment);
+// set verification based on sentiment
+$is_verified = ($sentiment === 'positive' || $sentiment === 'negative') ? 1 : 0;
+
+// insert review with conditional verification
+$ins = $conn->prepare("INSERT INTO reviews (booking_id, user_id, rating, comment, sentiment, is_verified) VALUES (?, ?, ?, ?, ?, ?)");
+$ins->bind_param('iiissi', $booking_id, $user_id, $rating, $comment, $sentiment, $is_verified);
+
 if (!$ins->execute()) {
     respondError('DB insert failed: ' . $conn->error, 500);
 }
 
 echo 'success';
 exit();
+
 
 
 function classifySentiment($text, $conn) {

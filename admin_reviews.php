@@ -215,14 +215,23 @@ $message_type = '';
                                                 <?= ucfirst($r['sentiment']) ?>
                                             </span>
                                         </td>
-                                        <td class="p-3"><?= htmlspecialchars($r['created_at']) ?></td>
                                         <td class="p-3">
-                                            <button 
-                                                class="revert-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-sm transition"
-                                                data-id="<?= $r['review_id'] ?>">
-                                                Revert
-                                            </button>
-                                        </td>
+    <?php
+        $formattedDate = date("F d, Y h:i A", strtotime($r['created_at']));
+        echo htmlspecialchars($formattedDate);
+    ?>
+</td>
+
+<td class="p-3">
+    <?php if ($r['sentiment'] === 'neutral'): ?>
+        <button 
+            class="revert-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-sm transition"
+            data-id="<?= $r['review_id'] ?>">
+            Revert
+        </button>
+    <?php endif; ?>
+</td>
+
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
