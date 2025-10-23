@@ -95,14 +95,28 @@ $message_type = '';
             $pendingReviews = $pendingStmt->fetchAll(PDO::FETCH_ASSOC);
 
             // Verified reviews
-            $verifiedStmt = $pdo->query("
-                SELECT r.*, u.first_name, u.last_name
-                FROM reviews r
-                LEFT JOIN users u ON r.user_id = u.user_id
-                WHERE r.is_verified = 1
-                ORDER BY r.created_at DESC
-            ");
-            $verifiedReviews = $verifiedStmt->fetchAll(PDO::FETCH_ASSOC);
+$ratingFilter = isset($_GET['rating_filter']) && is_numeric($_GET['rating_filter']) ? intval($_GET['rating_filter']) : null;
+
+$sql = "
+    SELECT r.*, u.first_name, u.last_name
+    FROM reviews r
+    LEFT JOIN users u ON r.user_id = u.user_id
+    WHERE r.is_verified = 1
+";
+
+if ($ratingFilter) {
+    $sql .= " AND r.rating = :rating";
+}
+
+$sql .= " ORDER BY r.created_at DESC";
+
+$verifiedStmt = $pdo->prepare($sql);
+if ($ratingFilter) {
+    $verifiedStmt->bindParam(':rating', $ratingFilter, PDO::PARAM_INT);
+}
+$verifiedStmt->execute();
+$verifiedReviews = $verifiedStmt->fetchAll(PDO::FETCH_ASSOC);
+
             ?>
             <div class="mb-6 flex space-x-4">
                 <button id="tab-pending" class="px-4 py-2 bg-plum-500 text-white rounded">Pending Reviews</button>
@@ -180,8 +194,34 @@ $message_type = '';
 
             <!-- Verified Reviews (hidden by default) -->
             <div id="verified-reviews" class="hidden">
+<div class="flex items-center gap-2 mb-4">
+    <span class="text-gray-700 font-medium">Filter by Stars:</span>
+    
+    <!-- ⭐ Star Filter -->
+    <div id="star-filter" class="flex items-center gap-1 cursor-pointer">
+        <?php
+        $selectedRating = isset($_GET['rating_filter']) ? intval($_GET['rating_filter']) : 0;
+        for ($i = 1; $i <= 5; $i++): 
+            $isSelected = $i <= $selectedRating;
+        ?>
+            <i class="fa fa-star text-xl <?= $isSelected ? 'text-yellow-400' : 'text-gray-300' ?>" 
+               data-value="<?= $i ?>"></i>
+        <?php endfor; ?>
+    </div>
+
+    <!-- 🧹 Show All Button -->
+    <button 
+        id="show-all-btn"
+        class="ml-4 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium px-3 py-1 rounded transition">
+        Show All Reviews
+    </button>
+</div>
+
+</div>
+
                 <?php if (count($verifiedReviews) > 0): ?>
                     <div class="bg-white rounded-xl shadow p-6">
+                        
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-lavender-100 text-gray-700">
@@ -313,6 +353,51 @@ $message_type = '';
 
         </main>
     </div>
+<script>
+document.querySelectorAll('#star-filter .fa-star').forEach(star => {
+    star.addEventListener('click', () => {
+        const selectedValue = star.getAttribute('data-value');
+        const currentUrl = new URL(window.location.href);
+
+        // Always go to verified tab
+        currentUrl.hash = 'verified-reviews';
+
+        // If clicking same star again → clear filter
+        if (currentUrl.searchParams.get('rating_filter') == selectedValue) {
+            currentUrl.searchParams.delete('rating_filter');
+        } else {
+            currentUrl.searchParams.set('rating_filter', selectedValue);
+        }
+
+        window.location.href = currentUrl.toString();
+    });
+});
+
+// 🧹 "Show All Reviews" button
+document.getElementById('show-all-btn').addEventListener('click', () => {
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.delete('rating_filter');
+    currentUrl.hash = 'verified-reviews';
+    window.location.href = currentUrl.toString();
+});
+
+// Auto-show verified tab if filtered or linked via hash
+window.addEventListener('DOMContentLoaded', () => {
+    const url = new URL(window.location.href);
+    const hash = url.hash;
+    const hasFilter = url.searchParams.has('rating_filter');
+
+    if (hash === '#verified-reviews' || hasFilter) {
+        document.getElementById('verified-reviews').classList.remove('hidden');
+        document.getElementById('pending-reviews').classList.add('hidden');
+        document.getElementById('tab-verified').classList.add('bg-plum-500', 'text-white');
+        document.getElementById('tab-verified').classList.remove('bg-gray-200', 'text-gray-700');
+        document.getElementById('tab-pending').classList.add('bg-gray-200', 'text-gray-700');
+        document.getElementById('tab-pending').classList.remove('bg-plum-500', 'text-white');
+    }
+});
+</script>
+
 
 </body>
 </html>

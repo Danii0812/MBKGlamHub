@@ -311,7 +311,11 @@ $conn->close();
                             <?php if ($isLoggedIn): ?>
                                 <a href="appointments.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Appointments</a>
                                 <a href="profile_settings.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile settings</a>
-                                <a href="logout.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Sign Out</a>
+                                <a href="#" id = "logoutBtn" 
+   class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+   Sign Out
+</a>
+
                             <?php else: ?>
                                 <a href="login.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Log In</a>
                             <?php endif; ?>
@@ -594,6 +598,27 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+<script>
+document.getElementById('logoutBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You’ll be logged out of your account.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#a06c9e',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, log me out',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Redirect to logout.php
+            window.location.href = 'logout.php';
+        }
+    });
+});
+</script>
 
 <script>
 function openReviewModal(userName, serviceType, muaName, hairstylistName, bookingId) {
