@@ -203,6 +203,12 @@ $bookings = $conn->query($query);
             <!-- Bookings Table -->
             <div class="bg-white shadow-md rounded-xl overflow-x-auto border border-gray-200 p-6">
                 <h2 class="text-xl font-heading font-bold text-plum-700 mb-4">All Bookings</h2>
+
+                    <?php if (isset($_GET['cancelled'])): ?>
+    <div class="bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded-md mb-4">
+        Booking successfully cancelled and email sent to the client.
+    </div>
+    <?php endif; ?>
                 <form method="GET" class="flex flex-wrap gap-4 items-center mb-6">
     <div class="relative">
         <input 
@@ -281,19 +287,26 @@ $bookings = $conn->query($query);
                                     ?>
                                 </td>
 
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-6 py-4 text-center space-x-2">
                                     <?php if ($row['is_confirmed'] == 0): ?>
                                         <a href="?confirm=<?= $row['booking_id'] ?>" class="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-1 rounded-md transition">
                                             Confirm
                                         </a>
+                                    <?php endif; ?>
+
+                                    <?php if ($row['payment_status'] === 'pending'): ?>
+                                        <button 
+                                            class="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 rounded-md transition open-cancel-modal"
+                                            data-booking-id="<?= $row['booking_id'] ?>">
+                                            Cancel
+                                        </button>
                                     <?php elseif ($row['is_confirmed'] == 1 && $row['payment_status'] === 'paid'): ?>
                                         <a href="?complete=<?= $row['booking_id'] ?>" class="bg-blue-500 hover:bg-blue-600 text-white text-sm px-3 py-1 rounded-md transition">
                                             Complete
                                         </a>
-                                    <?php else: ?>
-                                        <span class="text-gray-400 text-sm">—</span>
                                     <?php endif; ?>
                                 </td>
+
 
                             </tr>
                         <?php endwhile; ?>
@@ -302,8 +315,57 @@ $bookings = $conn->query($query);
             </div>
         </main>
     </div>
+
+    <!-- Cancel Modal -->
+<div id="cancelModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+    <h2 class="text-lg font-semibold text-plum-700 mb-4">Cancel Booking</h2>
+    <form id="cancelForm" method="POST" action="admin_cancel_booking.php">
+      <input type="hidden" name="cancel_booking_id" id="cancelBookingId">
+
+      <label class="block mb-2 font-medium text-sm text-gray-700">Reason for Cancelling</label>
+      <select name="cancel_reason" required class="w-full border border-gray-300 rounded-md p-2 mb-4">
+        <option value="">Select reason...</option>
+        <option value="Client did not pay">Client did not pay</option>
+        <option value="Client requested cancellation">Client requested cancellation</option>
+        <option value="Scheduling conflict">Scheduling conflict</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <label class="block mb-2 font-medium text-sm text-gray-700">Additional Details (optional)</label>
+      <textarea name="cancel_note" rows="3" class="w-full border border-gray-300 rounded-md p-2 mb-4"></textarea>
+
+      <div class="flex justify-end space-x-3">
+        <button type="button" id="closeCancelModal" class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition">Close</button>
+        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 </body>
 </html>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const modal = document.getElementById('cancelModal');
+  const closeModal = document.getElementById('closeCancelModal');
+  const bookingInput = document.getElementById('cancelBookingId');
+  const cancelButtons = document.querySelectorAll('.open-cancel-modal');
+
+  cancelButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const bookingId = btn.dataset.bookingId;
+      bookingInput.value = bookingId;
+      modal.classList.remove('hidden');
+    });
+  });
+
+  closeModal.addEventListener('click', () => {
+    modal.classList.add('hidden');
+  });
+});
+</script>
+
 <script>
  document.addEventListener('DOMContentLoaded', function () {
     const currentPath = window.location.pathname;

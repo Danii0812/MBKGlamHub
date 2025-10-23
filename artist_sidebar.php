@@ -78,10 +78,36 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
 
     <!-- Bottom: Sticky Logout Button -->
-    <div class="pt-4 border-t border-gray-100">
-        <a href="logout.php" class="flex items-center gap-3 px-4 py-3 hover:bg-red-100 hover:text-red-600 rounded-lg transition text-gray-700">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>Log Out</span>
-        </a>
-    </div>
+<!-- Logout -->
+<div class="pt-4">
+    <a href="#" id="logoutBtn" 
+       class="flex items-center gap-3 px-4 py-3 hover:bg-red-100 hover:text-red-600 rounded-lg transition text-gray-700">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Log Out</span>
+    </a>
+</div>
+
+
 </aside>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.getElementById('logoutBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You’ll be logged out of your artist account.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#a06c9e',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, log me out',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Redirect to logout.php
+            window.location.href = 'logout.php';
+        }
+    });
+});
+</script>

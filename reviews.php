@@ -165,17 +165,51 @@ $greetingName = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'Guest'
 <!-- Reviews Section -->
 <section class="py-20">
     <div class="container mx-auto px-4">
+        <div class="flex justify-center mb-8">
+    <div class="flex items-center gap-2">
+        <span class="text-gray-700 font-medium">Filter by rating:</span>
+        <div id="star-filter" class="flex items-center gap-1 cursor-pointer">
+            <?php
+            $selectedRating = isset($_GET['rating']) ? intval($_GET['rating']) : 0;
+            for ($i = 1; $i <= 5; $i++):
+                $isSelected = $i <= $selectedRating;
+            ?>
+                <i class="fa fa-star text-2xl <?= $isSelected ? 'text-yellow-400' : 'text-gray-300' ?>" data-value="<?= $i ?>"></i>
+            <?php endfor; ?>
+        </div>
+        <button 
+            id="show-all-btn"
+            class="ml-4 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium px-3 py-1 rounded transition">
+            Show All Reviews
+        </button>
+    </div>
+</div>
+
         <div class="grid lg:grid-cols-2 gap-8" id="reviews-container">
             <?php
             // Fetch first 4 verified reviews
-            $stmt = $pdo->prepare("
-                SELECT r.*, u.first_name, u.last_name 
-                FROM reviews r
-                LEFT JOIN users u ON r.user_id = u.user_id
-                WHERE r.is_verified = 1
-                ORDER BY r.created_at DESC
-                LIMIT 4
-            ");
+$ratingFilter = isset($_GET['rating']) && is_numeric($_GET['rating']) ? intval($_GET['rating']) : null;
+
+$sql = "
+    SELECT r.*, u.first_name, u.last_name 
+    FROM reviews r
+    LEFT JOIN users u ON r.user_id = u.user_id
+    WHERE r.is_verified = 1
+";
+
+if ($ratingFilter) {
+    $sql .= " AND r.rating = :rating";
+}
+
+$sql .= " ORDER BY r.created_at DESC LIMIT 4";
+
+$stmt = $pdo->prepare($sql);
+if ($ratingFilter) {
+    $stmt->bindParam(':rating', $ratingFilter, PDO::PARAM_INT);
+}
+$stmt->execute();
+$reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
             $stmt->execute();
             $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -319,4 +353,28 @@ loadMoreBtn.addEventListener('click', () => {
         });
 });
 </script>
+<script>
+document.querySelectorAll('#star-filter .fa-star').forEach(star => {
+    star.addEventListener('click', () => {
+        const selectedValue = star.getAttribute('data-value');
+        const currentUrl = new URL(window.location.href);
+
+        // If same rating is clicked again → clear filter
+        if (currentUrl.searchParams.get('rating') == selectedValue) {
+            currentUrl.searchParams.delete('rating');
+        } else {
+            currentUrl.searchParams.set('rating', selectedValue);
+        }
+
+        window.location.href = currentUrl.toString();
+    });
+});
+
+document.getElementById('show-all-btn').addEventListener('click', () => {
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.delete('rating');
+    window.location.href = currentUrl.toString();
+});
+</script>
+
 </html>
