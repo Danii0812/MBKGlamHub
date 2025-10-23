@@ -274,28 +274,10 @@ function sendMessage($pdo, $current_user_id, $input) {
 
 function markMessagesAsRead($pdo, $current_user_id, $other_user_id) {
     try {
-        // If admin, mark messages where receiver_id = 0 (shared inbox)
-        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
-            $sql = "UPDATE messages 
-                    SET is_read = 1 
-                    WHERE sender_id = ? 
-                      AND receiver_id = 0 
-                      AND is_read = 0";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$other_user_id]);
-        } else {
-            // Normal user: mark admin messages as read
-            $sql = "UPDATE messages 
-                    SET is_read = 1 
-                    WHERE sender_id IN (
-                        SELECT user_id FROM users WHERE role = 'admin'
-                    ) 
-                    AND receiver_id = ? 
-                    AND is_read = 0";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$current_user_id]);
-        }
-
+        $sql = "UPDATE messages SET is_read = 1 WHERE sender_id = ? AND receiver_id = ? AND is_read = 0";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$other_user_id, $current_user_id]);
+        
         echo json_encode(['success' => true, 'updated_count' => $stmt->rowCount()]);
     } catch (Exception $e) {
         error_log("Chat API Error: " . $e->getMessage());
@@ -303,7 +285,6 @@ function markMessagesAsRead($pdo, $current_user_id, $other_user_id) {
         echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
     }
 }
-
 
 function getUnreadCount($pdo, $current_user_id) {
     try {
