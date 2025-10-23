@@ -174,44 +174,38 @@ $admin_id = $_SESSION['user_id'];
             });
         }
 
-// Select conversation
-async function selectConversation(conversation) {
-    currentConversation = conversation;
-
-    // Update header
-    const chatHeader = document.getElementById('chatHeader');
-    chatHeader.innerHTML = `
-        <div class="flex items-center justify-between">
-            <div class="flex items-center">
-                <div class="w-10 h-10 bg-gradient-to-r from-plum-400 to-plum-600 rounded-full flex items-center justify-center text-white font-semibold mr-3">
-                    ${conversation.user_name.charAt(0).toUpperCase()}
+        // Select conversation
+        async function selectConversation(conversation) {
+            currentConversation = conversation;
+            
+            // Update header
+            const chatHeader = document.getElementById('chatHeader');
+            chatHeader.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-r from-plum-400 to-plum-600 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                            ${conversation.user_name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div class="font-semibold text-gray-800">${conversation.user_name}</div>
+                            <div class="text-sm text-gray-600">${conversation.email}</div>
+                        </div>
+                    </div>
+                    <a href="admin_dashboard.php" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                    </a>
                 </div>
-                <div>
-                    <div class="font-semibold text-gray-800">${conversation.user_name}</div>
-                    <div class="text-sm text-gray-600">${conversation.email}</div>
-                </div>
-            </div>
-            <a href="admin_dashboard.php" class="text-gray-600 hover:text-gray-800">
-                <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
-            </a>
-        </div>
-    `;
+            `;
 
-    // Show message input
-    document.getElementById('messageInput').classList.remove('hidden');
+            // Show message input
+            document.getElementById('messageInput').classList.remove('hidden');
 
-    // Load messages
-    await loadMessages(conversation.user_id);
-
-    // 🟢 Mark all messages from this user as read in the database
-    await markMessagesAsRead(conversation.user_id);
-
-    // 🔴 Immediately clear unread badge in the sidebar
-    conversation.unread_count = 0;
-    renderConversations();
-}
-
-
+            // Load messages
+            await loadMessages(conversation.user_id);
+            
+            // Update conversations list to show selected
+            renderConversations();
+        }
 
         // Load messages for conversation
         async function loadMessages(userId) {
@@ -391,23 +385,6 @@ async function selectConversation(conversation) {
                 loadMessages(currentConversation.user_id);
             }
         }, 5000);
-
-        async function markMessagesAsRead(userId) {
-    try {
-        const response = await fetch('chat_api.php?action=mark_read', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ other_user_id: userId })
-        });
-        const data = await response.json();
-        if (!data.success) {
-            console.error('Failed to mark messages as read:', data.error);
-        }
-    } catch (error) {
-        console.error('Error marking messages as read:', error);
-    }
-}
-
     </script>
 </body>
 </html>
