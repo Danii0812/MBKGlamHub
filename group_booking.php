@@ -4,198 +4,240 @@ session_start();
 $isLoggedIn = isset($_SESSION['user_id']);
 $greetingName = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'Guest';
 ?>
+<!D
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MBK GlamHub</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MBK GlamHub | Booking Form</title>
+  <link rel="icon" type="image/png" href="mbk_logo.png" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
             lavender: {
-              50: '#fafaff',
-              100: '#f5f5fa',
-              200: '#ececf7',
-              300: '#e6e6fa',
-              400: '#d8d1e8',
-              500: '#c2b6d9',
-              600: '#a79dbf',
-              700: '#8e83a3',
-              800: '#756a86',
-              900: '#5d516c'
+              50: '#fafaff', 100: '#f5f5fa', 200: '#ececf7', 300: '#e6e6fa',
+              400: '#d8d1e8', 500: '#c2b6d9', 600: '#a79dbf', 700: '#8e83a3',
+              800: '#756a86', 900: '#5d516c'
             },
             plum: {
-              50: '#f9f2f7',
-              100: '#f1e3ef',
-              200: '#e0c5dc',
-              300: '#c89ac1',
-              400: '#a06c9e',
-              500: '#804f7e',
-              600: '#673f68',
-              700: '#4b2840',
-              800: '#3c1f33',
-              900: '#2c1726'
+              50: '#f9f2f7', 100: '#f1e3ef', 200: '#e0c5dc', 300: '#c89ac1',
+              400: '#a06c9e', 500: '#804f7e', 600: '#673f68', 700: '#4b2840',
+              800: '#3c1f33', 900: '#2c1726'
             }
+          },
+          boxShadow: {
+            soft: '0 6px 20px rgba(0,0,0,0.08)'
+          },
+          fontFamily: {
+            // You can add your custom fonts here if used on other pages
           }
         }
       }
     }
   </script>
+
   <style>
-    .gradient-text {
+    .gradient-text{
       background: linear-gradient(to right, #a06c9e, #4b2840);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    .gradient-bg {
-      background: linear-gradient(to right, #a06c9e, #4b2840);
-    }
-    .gradient-bg:hover {
-      background: linear-gradient(to right, #804f7e, #673f68);
-    }
-    html {
-      scroll-behavior: smooth;
-    }
+    .gradient-bg{ background: linear-gradient(to right, #a06c9e, #4b2840); }
+    .gradient-bg:hover{ background: linear-gradient(to right, #804f7e, #673f68); }
+    html{ scroll-behavior: smooth; }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-lavender-50 via-lavender-100 to-lavender-200">
 
-<!-- Header -->
-<header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-lavender-200">
-  <div class="container mx-auto px-4 py-4">
-    <div class="flex items-center justify-between">
-    <div class="flex items-center space-x-2">
-      <a href="homepage.php"><img src="logo.png" alt="Make up By Kyleen Logo" class="h-10 w-auto"></a>
+<body class="min-h-screen bg-white text-gray-800">
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-lavender-200">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <a href="homepage.php">
+            <img src="mbk_logo.png" alt="Make up By Kyleen Logo" class="h-10 w-auto">
+          </a>
+        </div>
+
+        <nav class="hidden md:flex items-center space-x-8">
+          <a href="services.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Services</a>
+          <a href="homepage.php#about" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">About</a>
+          <a href="artist_portfolio.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Portfolio</a>
+          <a href="reviews.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Reviews</a>
+            <!-- Dropdown Menu -->
+          <div class="relative group inline-block text-left">
+            <span class="gradient-bg text-white px-6 py-2 rounded-md font-medium transition-all inline-block cursor-pointer shadow-soft">
+              Hello, <?php echo htmlspecialchars($greetingName); ?>
+              <i class="fas fa-chevron-down text-white text-sm"></i>
+            </span>
+            <div class="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all z-50">
+              <?php if ($isLoggedIn): ?>
+                <a href="appointments.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Appointments</a>
+                <a href="profile_settings.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile Settings</a>
+                <a href="logout.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Sign Out</a>
+              <?php else: ?>
+                <a href="login.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Log In</a>
+              <?php endif; ?>
+            </div>
+          </div>
+        </nav>
+      </div>
     </div>
+  </header>
 
-      <nav class="hidden md:flex items-center space-x-8">
-        <a href="#services" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Services</a>
-        <a href="#about" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">About</a>
-        <a href="artist_portfolio.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Portfolio</a>
-        <a href="reviews.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Reviews</a>
-<!-- Dropdown Menu Container -->
-<div class="relative group inline-block text-left">
-  <span class="gradient-bg text-white px-6 py-2 rounded-md font-medium transition-all inline-block cursor-pointer">
-    Hello, <?php echo htmlspecialchars($greetingName); ?>
-    <i class="fas fa-chevron-down text-white text-sm"></i>
-  </span>
+  <!-- Main -->
+  <div class="flex-1 flex flex-col items-center justify-center p-4">
+   <!-- Step Indicator (Gradient Circles + Short Dividers) -->
+<div class="mb-10 flex items-center justify-center text-gray-600 font-semibold">
+  <!-- Step 1: Active -->
+  <div class="flex flex-col items-center">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-plum-500 to-lavender-400 flex items-center justify-center text-white text-lg font-bold mb-2 shadow-lg ring-4 ring-lavender-200/50">
+      1
+    </div>
+    <span class="text-plum-700 font-bold">Booking Details</span>
+  </div>
 
-  <!-- Dropdown Items -->
-  <div class="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all z-50">
-    <?php if ($isLoggedIn): ?>
-      <a href="appointments.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Appointments</a>
-      <a href="profile_settings.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile Settings</a>
-      <a href="logout.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Sign Out</a>
-    <?php else: ?>
-      <a href="login.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Log In</a>
-    <?php endif; ?>
+  <!-- Divider -->
+  <div class="w-10 h-1 bg-gradient-to-r from-lavender-300 to-lavender-100 mx-3 rounded-full"></div>
+
+  <!-- Step 2 -->
+  <div class="flex flex-col items-center opacity-90">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-gray-200 to-gray-100 flex items-center justify-center text-gray-600 text-lg font-bold mb-2 shadow-inner border border-lavender-200">
+      2
+    </div>
+    <span class="text-gray-600 font-medium">Glam Teams</span>
+  </div>
+
+  <!-- Divider -->
+  <div class="w-10 h-1 bg-gradient-to-r from-lavender-300 to-lavender-100 mx-3 rounded-full"></div>
+
+  <!-- Step 3 -->
+  <div class="flex flex-col items-center opacity-90">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-gray-200 to-gray-100 flex items-center justify-center text-gray-600 text-lg font-bold mb-2 shadow-inner border border-lavender-200">
+      3
+    </div>
+    <span class="text-gray-600 font-medium">Select Package</span>
+  </div>
+
+  <!-- Divider -->
+  <div class="w-10 h-1 bg-gradient-to-r from-lavender-300 to-lavender-100 mx-3 rounded-full"></div>
+
+  <!-- Step 4 -->
+  <div class="flex flex-col items-center opacity-90">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-gray-200 to-gray-100 flex items-center justify-center text-gray-600 text-lg font-bold mb-2 shadow-inner border border-lavender-200">
+      4
+    </div>
+    <span class="text-gray-600 font-medium">Confirmation</span>
   </div>
 </div>
 
 
+    <!-- Booking Form (unchanged functionality) -->
+    <main class="w-full max-w-3xl p-8 bg-white rounded-xl shadow-lg border border-lavender-100">
+      <h2 class="text-3xl font-heading font-bold text-center text-plum-700 mb-8">Booking Details</h2>
 
-      </nav>
-    </div>
-  </div>
-</header>
-    <div class="flex-1 flex flex-col items-center justify-center p-4">
-        <!-- Step Indicator -->
-        <div class="mb-8 flex items-center justify-center space-x-8 text-gray-500 font-semibold">
-            <!-- Step 1: Booking Details (Active) -->
-            <div class="flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full bg-plum-500 flex items-center justify-center text-white font-bold text-lg shadow-md">1</div>
-                <span class="text-plum-700 font-bold">Booking Details</span>
-            </div>
-
-<!-- Line between steps -->
-<div class="w-10 h-1 bg-gray-300 mt-4"></div>
-            <!-- Step 2: Glam Teams (Inactive) -->
-            <div class="flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 text-lg font-bold mb-2">2</div>
-                <span>Glam Teams</span>
-            </div>
-  
-<!-- Line between steps -->
-<div class="w-10 h-1 bg-gray-300 mt-4"></div>
-            <!-- Step 3: Select Package (Inactive) -->
-            <div class="flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 text-lg font-bold mb-2">3</div>
-                <span>Select Package</span>
-            </div>
-           
-<!-- Line between steps -->
-<div class="w-10 h-1 bg-gray-300 mt-4"></div>
-            <!-- Step 4: Confirmation (Inactive) -->
-            <div class="flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 text-lg font-bold mb-2">4</div>
-                <span>Confirmation</span>
-            </div>
-        </div>
-        <main class="w-full max-w-3xl p-8 bg-white rounded-xl shadow-lg border border-lavender-100">
-    <h2 class="text-3xl font-heading font-bold text-center text-plum-700 mb-8">Booking Details</h2>
-
-    <form action="submit_group_booking.php" method="POST" class="space-y-6">
-      <div>
-        <label for="booking_date" class="block text-gray-700 font-semibold mb-2">
-          <i class="fas fa-calendar-alt text-plum-500 mr-2"></i>Booking Date <span class="text-red-500">*</span>
-        </label>
-        <input
+      <form action="submit_group_booking.php" method="POST" class="space-y-6">
+        <div>
+          <label for="booking_date" class="block text-gray-700 font-semibold mb-2">
+            <i class="fas fa-calendar-alt text-plum-500 mr-2"></i>Booking Date <span class="text-red-500">*</span>
+          </label>
+          <input
             type="date"
             name="booking_date"
             id="booking_date"
             required
             class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-plum-300 focus:border-plum-500 transition-all"/>
-            </div>
-      <div>
-        <label for="booking_time" class="block text-gray-700 font-semibold mb-2">
-          <i class="fas fa-clock text-plum-500 mr-2"></i>Booking Time <span class="text-red-500">*</span>
-        </label>
-        <input type="time" name="booking_time" id="booking_time" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-plum-300 focus:border-plum-500" />
-      </div>
-      <div>
-        <label for="booking_address" class="block text-gray-700 font-semibold mb-2">
-          <i class="fas fa-map-marker-alt text-plum-500 mr-2"></i>Booking Address <span class="text-red-500">*</span>
-        </label>
-        <input type="text" name="booking_address" id="booking_address" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-plum-300 focus:border-plum-500" />
-      </div>
-      <div>
-        <label for="client_count" class="block text-gray-700 font-semibold mb-2">
-          <i class="fas fa-users text-plum-500 mr-2"></i>Number of Clients <span class="text-red-500">*</span>
-        </label>
-        <input type="number" name="client_count" id="client_count" value="<?= isset($_SESSION['client_count']) ? $_SESSION['client_count'] : 1 ?>" required oninput="updateForms()" min="1" max="15" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-plum-300 focus:border-plum-500" />
-      </div>
-      <div>
-        <label for="shared_event_type" class="block text-gray-700 font-semibold mb-2">
-          <i class="fas fa-calendar text-plum-500 mr-2"></i>Event Type <span class="text-red-500">*</span>
-        </label>
-        <select id="shared_event_type" name="shared_event_type" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-plum-300 focus:border-plum-500">
-          <option value="Wedding">Wedding</option>
-          <option value="Debut">Debut</option>
-          <option value="Photoshoot">Photoshoot</option>
-          <option value="Graduation">Graduation</option>
-          <option value="Birthday">Birthday</option>
-          <option value="Others">Others</option>
-        </select>
-      </div>
-      <div>
-        <label for="price_range" class="block text-gray-700 font-semibold mb-2">Price Range (Auto-selected):</label>
-        <input type="text" id="price_range" name="price_range" readonly class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 cursor-not-allowed text-gray-600" />
-      </div>
+        </div>
 
-      <div id="client_forms" class="space-y-8 hidden"></div>
+        <div>
+          <label for="booking_time" class="block text-gray-700 font-semibold mb-2">
+            <i class="fas fa-clock text-plum-500 mr-2"></i>Booking Time <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="time"
+            name="booking_time"
+            id="booking_time"
+            required
+            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-plum-300 focus:border-plum-500"/>
+        </div>
 
-      <button type="submit" class="w-full bg-plum-500 hover:bg-plum-600 text-white py-3 rounded-2xl font-semibold text-lg transition-all shadow-md hover:shadow-lg mt-8 flex items-center justify-center space-x-2">
-        <span>Proceed</span><i class="fas fa-arrow-right"></i>
-      </button>
-    </form>
-  </main>
-</div>
+        <div>
+          <label for="booking_address" class="block text-gray-700 font-semibold mb-2">
+            <i class="fas fa-map-marker-alt text-plum-500 mr-2"></i>Booking Address <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            name="booking_address"
+            id="booking_address"
+            required
+            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-plum-300 focus:border-plum-500"/>
+        </div>
+
+        <div>
+          <label for="client_count" class="block text-gray-700 font-semibold mb-2">
+            <i class="fas fa-users text-plum-500 mr-2"></i>Number of Clients <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            name="client_count"
+            id="client_count"
+            value="<?= isset($_SESSION['client_count']) ? $_SESSION['client_count'] : 1 ?>"
+            required
+            oninput="updateForms()"
+            min="1"
+            max="15"
+            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-plum-300 focus:border-plum-500"/>
+        </div>
+
+        <div>
+          <label for="shared_event_type" class="block text-gray-700 font-semibold mb-2">
+            <i class="fas fa-calendar text-plum-500 mr-2"></i>Event Type <span class="text-red-500">*</span>
+          </label>
+          <select
+            id="shared_event_type"
+            name="shared_event_type"
+            required
+            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-plum-300 focus:border-plum-500">
+            <option value="Wedding">Wedding</option>
+            <option value="Debut">Debut</option>
+            <option value="Photoshoot">Photoshoot</option>
+            <option value="Graduation">Graduation</option>
+            <option value="Birthday">Birthday</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="price_range" class="block text-gray-700 font-semibold mb-2">
+            Price Range (Auto-selected):
+          </label>
+          <input
+            type="text"
+            id="price_range"
+            name="price_range"
+            readonly
+            class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 cursor-not-allowed text-gray-600"/>
+        </div>
+
+        <!-- Keep this container (used by your JS) -->
+        <div id="client_forms" class="space-y-8 hidden"></div>
+
+        <button
+          type="submit"
+          class="w-full bg-plum-600 hover:bg-plum-700 text-white py-3 rounded-2xl font-semibold text-lg transition-all shadow-md hover:shadow-lg mt-8 flex items-center justify-center space-x-2">
+          <span>Proceed</span><i class="fas fa-arrow-right"></i>
+        </button>
+      </form>
+    </main>
+  </div>
 
 <script>
 function updateForms() {
@@ -214,7 +256,7 @@ function updateForms() {
   } else if (actualCount <= 10) {
     priceInput.value = 'Medium (₱20,001–₱25,000)';
   } else {
-    priceInput.value = 'High (₱25,001 and above)';
+    priceInput.value = 'High (₱26,000 and above)';
   }
 
   formsContainer.classList.remove('hidden');

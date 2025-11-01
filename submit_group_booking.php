@@ -13,7 +13,8 @@ require_once __DIR__ . '/db.php';
 
 // Require login
 if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit; }
-
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 // ---------- Helpers ----------
 function s($v) { return trim((string)$v); }
 function arr_get($arr, $i, $def=null){ return (is_array($arr) && array_key_exists($i,$arr)) ? $arr[$i] : $def; }
@@ -173,6 +174,22 @@ if ($errors) {
 // Persist date/time in case later pages need them
 $_SESSION['booking_date'] = $booking_date;
 $_SESSION['booking_time'] = $booking_time;
+// ---------- Idempotency (avoid duplicate inserts on back/refresh) ----------
+$submission_token = build_submission_token($user_id, $booking_date, $booking_time, $client_names, $package_id);
+if (!isset($_SESSION['__booking_dedup'])) $_SESSION['__booking_dedup'] = [];
+dedup_gc($_SESSION['__booking_dedup']);
+
+if (isset($_SESSION['__booking_dedup'][$submission_token])) {
+  // We've already processed this exact submission -> reuse the existing booking
+  $prev = $_SESSION['__booking_dedup'][$submission_token];
+
+  // Keep downstream expectations intact
+  $_SESSION['selected_date'] = $prev['booking_date'] ?? $booking_date;
+  $_SESSION['selected_time'] = $prev['booking_time'] ?? $booking_time;
+
+  header("Location: show_team_selection.php?team_id=".$prev['team_id']."&booking_id=".$prev['booking_id'], true, 303);
+  exit;
+}
 
 // ---------- Transaction ----------
 $conn->begin_transaction();
@@ -260,13 +277,22 @@ try {
 
   $conn->commit();
 
-    // Make sure show_team_selection.php gets what it expects
-    $_SESSION['selected_date'] = $booking_date;   // for show_team_selection.php
-    $_SESSION['selected_time'] = $booking_time;   // for show_team_selection.php
+// Remember this submission so a back/refresh won't create a duplicate
+$_SESSION['__booking_dedup'][$submission_token] = [
+  'booking_id'   => $booking_id,
+  'team_id'      => $team_id,
+  'booking_date' => $booking_date,
+  'booking_time' => $booking_time,
+  'ts'           => time(),
+];
 
-    // Redirect to the team selection page with team_id + booking_id
-    header("Location: show_team_selection.php?team_id=".$team_id."&booking_id=".$booking_id);
-    exit;
+// Make sure show_team_selection.php gets what it expects
+$_SESSION['selected_date'] = $booking_date;   // for show_team_selection.php
+$_SESSION['selected_time'] = $booking_time;   // for show_team_selection.php
+
+// PRG: 303 See Other after POST
+header("Location: show_team_selection.php?team_id=".$team_id."&booking_id=".$booking_id, true, 303);
+exit; 
 
 } catch (Exception $ex) {
   $conn->rollback();
@@ -274,4 +300,46 @@ try {
   http_response_code(500);
   echo "Sorry, we couldn't save your booking. Please try again.";
   exit;
+}
+
+function lower_utf8($s) {
+  if (!is_string($s)) $s = (string)$s;
+  return function_exists('mb_strtolower') ? mb_strtolower($s, 'UTF-8') : strtolower($s);
+}
+
+/**
+ * Build a stable idempotency token.
+ * - Uses posted token if provided (for newer forms).
+ * - Otherwise computes a deterministic key from key booking fields.
+ */
+function build_submission_token($user_id, $booking_date, $booking_time, $client_names, $package_id) {
+  $posted = trim((string)($_POST['submission_token'] ?? ''));
+  if ($posted !== '') return $posted;
+
+  // Normalize client names to make the token stable
+  $names = is_array($client_names) ? array_values($client_names) : [$client_names];
+  $names = array_map(function($n){ return lower_utf8(trim((string)$n)); }, $names);
+
+  $base = [
+    'u'  => (int)$user_id,
+    'd'  => (string)$booking_date,
+    't'  => (string)$booking_time,
+    'ns' => $names,
+    'pk' => (int)($package_id ?? 0),
+  ];
+  return hash('sha256', json_encode($base, JSON_UNESCAPED_UNICODE));
+}
+
+/** Clean up old dedup entries to keep the session small */
+function dedup_gc(&$cache, $ttl = 1800) { // 30 minutes
+  $now = time();
+  foreach ($cache as $k => $meta) {
+    if (!isset($meta['ts']) || ($now - (int)$meta['ts']) > $ttl) {
+      unset($cache[$k]);
+    }
+  }
+  // Keep at most 100 entries
+  if (count($cache) > 100) {
+    $cache = array_slice($cache, -100, null, true);
+  }
 }

@@ -27,7 +27,9 @@ $greetingName = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'Guest'
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Reviews - MBK GlamHub</title>
+    <link rel="icon" type="image/png" href="mbk_logo.png" />
+  <title>MBK GlamHub | Reviews </title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -103,50 +105,85 @@ $greetingName = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'Guest'
         }
     </style>
 </head>
-<body>
+<body class="opacity-0 translate-y-4 transition-all duration-700 ease-out" onload="document.body.classList.remove('opacity-0','translate-y-4')">
+<!-- Header -->
 <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-lavender-200">
   <div class="container mx-auto px-4 py-4">
     <div class="flex items-center justify-between">
-      <div class="flex items-center space-x-2">
-        <a href="homepage.php"><img src="mbk_logo.png" alt="Make up By Kyleen Logo" class="h-14 w-auto"></a>
-      </div>
+      <a href="homepage.php"><img src="mbk_logo.png" alt="Make up By Kyleen Logo" class="h-14 w-auto"></a>
+
       <nav class="hidden md:flex items-center space-x-8">
-        <a href="homepage.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Services</a>
-        <a href="#about" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">About</a>
-        <a href="artist_portfolio.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Portfolio</a>
+        <a href="services.php" class="text-gray-700 hover:text-plum-600 font-medium">Services</a>
+        <a href="#about" class="text-gray-700 hover:text-plum-600 font-medium">About</a>
+        <a href="artist_portfolio.php" class="text-gray-700 hover:text-plum-600 font-medium">Portfolio</a>
         <a href="reviews.php" class="text-plum-600 font-medium">Reviews</a>
-        <div class="relative group inline-block text-left">
-            <span class="gradient-bg text-white px-6 py-2 rounded-md font-medium transition-all inline-block cursor-pointer">
-                Hello, <?= htmlspecialchars($greetingName); ?>
-                <i class="fas fa-chevron-down text-white text-sm ml-1"></i>
-            </span>
-            <div class="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all z-50">
-                <?php if ($isLoggedIn): ?>
-                    <a href="appointments.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Appointments</a>
-                    <a href="logout.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Sign Out</a>
-                <?php else: ?>
-                    <a href="login.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Log In</a>
-                <?php endif; ?>
-            </div>
+
+        <!-- Dropdown -->
+        <div class="relative inline-block text-left">
+          <button id="dropdownBtn" class="gradient-bg text-white px-6 py-2 rounded-md font-medium inline-flex items-center gap-2 cursor-pointer focus:outline-none">
+            Hello, <?php echo htmlspecialchars($greetingName); ?>
+            <i class="fas fa-chevron-down text-white text-xs transition-transform duration-200"></i>
+          </button>
+
+          <div id="dropdownMenu"
+            class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 scale-95 transform origin-top transition-all duration-200 pointer-events-none">
+            <?php if ($isLoggedIn): ?>
+              <a href="appointments.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">My Appointments</a>
+              <a href="profile_settings.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Profile Settings</a>
+              <a href="#" id="logoutBtn" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Sign Out</a>
+            <?php else: ?>
+              <a href="login.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Log In</a>
+            <?php endif; ?>
+          </div>
         </div>
       </nav>
     </div>
   </div>
 </header>
 
+<script>
+const btn = document.getElementById('dropdownBtn');
+const menu = document.getElementById('dropdownMenu');
+const icon = btn.querySelector('i');
+
+btn.addEventListener('click', () => {
+  const open = menu.classList.contains('opacity-100');
+  document.querySelectorAll('#dropdownMenu').forEach(m => {
+    m.classList.remove('opacity-100','scale-100');
+    m.classList.add('opacity-0','scale-95','pointer-events-none');
+  });
+  if (!open) {
+    menu.classList.remove('opacity-0','scale-95','pointer-events-none');
+    menu.classList.add('opacity-100','scale-100');
+  }
+});
+
+// optional: close when clicking outside
+document.addEventListener('click', (e) => {
+  if (!btn.contains(e.target) && !menu.contains(e.target)) {
+    menu.classList.add('opacity-0','scale-95','pointer-events-none');
+    menu.classList.remove('opacity-100','scale-100');
+  }
+});
+</script>
+
 
 
 <!-- Reviews Intro Section -->
-<section class="py-32 bg-white">
-    <div class="container mx-auto px-4 text-center">
-        <h1 class="text-5xl lg:text-6xl font-bold mb-8 gradient-text tracking-wide leading-tight">
-            What Our Clients Say
-        </h1>
-        <p class="text-gray-700 max-w-3xl mx-auto text-lg lg:text-xl leading-relaxed">
-            At MBK GlamHub, we value every client experience. Here you can read <span class="font-semibold text-plum-600">verified reviews</span> from clients who trusted us for their special moments.
-            Honest feedback helps us continue improving our services and ensures that every client feels confident in choosing us.
-        </p>
-    </div>
+<section class="py-12 bg-white">
+  <div class="max-w-7xl mx-auto px-4 text-center">
+    <h2 class="text-4xl lg:text-5xl font-bold mb-4 gradient-text tracking-wide leading-tight">
+      What Our Clients Say
+    </h2>
+    <!-- underline accent like services -->
+    <div class="mx-auto h-1.5 w-20 rounded-full gradient-bg"></div>
+
+    <p class="mt-5 text-gray-600 max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
+      At MBK GlamHub, we value every client experience. Here you can read
+      <span class="font-semibold text-plum-600">verified reviews</span> from clients who trusted us for their special moments.
+      Honest feedback helps us keep improving and ensures you feel confident choosing us.
+    </p>
+  </div>
 </section>
 
 
@@ -161,110 +198,133 @@ $greetingName = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'Guest'
     }
 </style>
 
-
 <!-- Reviews Section -->
-<section class="py-20">
-    <div class="container mx-auto px-4">
-        <div class="flex justify-center mb-8">
-    <div class="flex items-center gap-2">
-        <span class="text-gray-700 font-medium">Filter by rating:</span>
-        <div id="star-filter" class="flex items-center gap-1 cursor-pointer">
-            <?php
-            $selectedRating = isset($_GET['rating']) ? intval($_GET['rating']) : 0;
-            for ($i = 1; $i <= 5; $i++):
-                $isSelected = $i <= $selectedRating;
-            ?>
-                <i class="fa fa-star text-2xl <?= $isSelected ? 'text-yellow-400' : 'text-gray-300' ?>" data-value="<?= $i ?>"></i>
-            <?php endfor; ?>
-        </div>
-        <button 
-            id="show-all-btn"
-            class="ml-4 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium px-3 py-1 rounded transition">
-            Show All Reviews
-        </button>
+<section class="py-12 bg-white">
+  <div class="max-w-7xl mx-auto px-4">
+    <!-- Filter bar -->
+<!-- Enhanced Filter by Rating -->
+<div class="flex justify-center mb-10">
+  <div class="flex flex-wrap items-center justify-center gap-3 bg-white shadow-sm border border-lavender-200 rounded-full px-6 py-3">
+    
+    <!-- Label -->
+    <span class="text-gray-700 font-medium text-sm md:text-base">
+      Filter by rating:
+    </span>
+
+    <!-- Star Filter -->
+    <div id="star-filter" class="flex items-center gap-1 cursor-pointer">
+      <?php
+      $selectedRating = isset($_GET['rating']) ? intval($_GET['rating']) : 0;
+      for ($i = 1; $i <= 5; $i++):
+          $isSelected = $i <= $selectedRating;
+      ?>
+        <i 
+          class="fa fa-star text-2xl transition-all duration-200 <?= $isSelected ? 'text-yellow-400 scale-110 drop-shadow-sm' : 'text-gray-300 hover:text-yellow-300 hover:scale-105' ?>" 
+          data-value="<?= $i ?>">
+        </i>
+      <?php endfor; ?>
     </div>
+
+    <!-- Divider Dot -->
+    <div class="h-3 w-[1px] bg-lavender-200 mx-2 hidden sm:block"></div>
+
+    <!-- Show All Button -->
+    <button
+      id="show-all-btn"
+      class="bg-gradient-to-r from-[#a06c9e] to-[#4b2840] text-white text-sm font-medium px-4 py-1.5 rounded-full shadow-sm hover:opacity-90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#a06c9e] focus:ring-offset-1">
+      Show All
+    </button>
+  </div>
 </div>
 
-        <div class="grid lg:grid-cols-2 gap-8" id="reviews-container">
-            <?php
-            // Fetch first 4 verified reviews
-$ratingFilter = isset($_GET['rating']) && is_numeric($_GET['rating']) ? intval($_GET['rating']) : null;
 
-$sql = "
-    SELECT r.*, u.first_name, u.last_name 
-    FROM reviews r
-    LEFT JOIN users u ON r.user_id = u.user_id
-    WHERE r.is_verified = 1
-";
+    <div class="grid md:grid-cols-2 gap-6" id="reviews-container">
+      <?php
+      // Fetch first 4 verified reviews (kept your logic)
+      $ratingFilter = isset($_GET['rating']) && is_numeric($_GET['rating']) ? intval($_GET['rating']) : null;
 
-if ($ratingFilter) {
-    $sql .= " AND r.rating = :rating";
-}
+      $sql = "
+          SELECT r.*, u.first_name, u.last_name
+          FROM reviews r
+          LEFT JOIN users u ON r.user_id = u.user_id
+          WHERE r.is_verified = 1
+      ";
 
-$sql .= " ORDER BY r.created_at DESC LIMIT 4";
+      if ($ratingFilter) {
+          $sql .= " AND r.rating = :rating";
+      }
 
-$stmt = $pdo->prepare($sql);
-if ($ratingFilter) {
-    $stmt->bindParam(':rating', $ratingFilter, PDO::PARAM_INT);
-}
-$stmt->execute();
-$reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      $sql .= " ORDER BY r.created_at DESC LIMIT 4";
 
-            $stmt->execute();
-            $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      $stmt = $pdo->prepare($sql);
+      if ($ratingFilter) {
+          $stmt->bindParam(':rating', $ratingFilter, PDO::PARAM_INT);
+      }
+      $stmt->execute();
+      $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            foreach ($reviews as $review):
-                $sentimentColors = [
-                    'positive' => 'bg-green-100 text-green-700',
-                    'neutral' => 'bg-yellow-100 text-yellow-700',
-                    'negative' => 'bg-red-100 text-red-700'
-                ];
-                $tagClass = $sentimentColors[$review['sentiment']] ?? 'bg-gray-100 text-gray-700';
+      foreach ($reviews as $review):
+          $sentimentColors = [
+              'positive' => 'bg-green-100 text-green-700',
+              'neutral'  => 'bg-yellow-100 text-yellow-700',
+              'negative' => 'bg-red-100 text-red-700'
+          ];
+          $tagClass = $sentimentColors[$review['sentiment']] ?? 'bg-gray-100 text-gray-700';
 
-                // Generate initials
-                $firstInitial = strtoupper(substr($review['first_name'], 0, 1));
-                $lastInitial = strtoupper(substr($review['last_name'], 0, 1));
-                $initials = $firstInitial . $lastInitial;
-            ?>
-            <div class="review-card bg-white rounded-2xl p-8 shadow-lg border border-lavender-200 hover:border-plum-300">
-                <div class="flex items-start justify-between mb-6">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-r from-lavender-400 to-plum-500 text-white font-semibold mr-4">
-                            <?= $initials; ?>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-gray-900"><?= htmlspecialchars($review['first_name'] . ' ' . $review['last_name']); ?></h3>
-                            <p class="text-sm text-gray-600"><?= date('M d, Y', strtotime($review['created_at'])); ?></p>
-                        </div>
-                    </div>
-                    <div class="star-rating">
-                        <?php
-                        $rating = (int)$review['rating'];
-                        for ($i = 1; $i <= 5; $i++) {
-                            echo $i <= $rating
-                                ? '<i class="fas fa-star star"></i>'
-                                : '<i class="far fa-star star"></i>';
-                        }
-                        ?>
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <span class="inline-block <?= $tagClass ?> px-3 py-1 rounded-full text-sm font-medium">
-                        <?= ucfirst($review['sentiment']); ?>
-                    </span>
-                </div>
-                <p class="text-gray-700 leading-relaxed mb-6"><?= htmlspecialchars($review['comment']); ?></p>
+          // initials
+          $firstInitial = strtoupper(substr($review['first_name'], 0, 1));
+          $lastInitial  = strtoupper(substr($review['last_name'], 0, 1));
+          $initials     = $firstInitial . $lastInitial;
+      ?>
+      <div class="review-card bg-white rounded-2xl shadow-lg border border-lavender-200 hover:border-lavender-300 transition">
+
+
+        <div class="p-6">
+          <div class="flex items-start justify-between mb-5">
+            <div class="flex items-center">
+              <div class="w-12 h-12 flex items-center justify-center rounded-full text-white font-semibold mr-4 gradient-bg">
+                <?= $initials; ?>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900">
+                  <?= htmlspecialchars($review['first_name'] . ' ' . $review['last_name']); ?>
+                </h3>
+                <p class="text-sm text-gray-600"><?= date('M d, Y', strtotime($review['created_at'])); ?></p>
+              </div>
             </div>
-            <?php endforeach; ?>
-        </div>
+            <div class="star-rating text-plum-700">
+              <?php
+              $rating = (int)$review['rating'];
+              for ($i = 1; $i <= 5; $i++) {
+                  echo $i <= $rating
+                      ? '<i class="fas fa-star star"></i>'
+                      : '<i class="far fa-star star text-gray-300"></i>';
+              }
+              ?>
+            </div>
+          </div>
 
-        <!-- Load More Button -->
-        <div class="text-center mt-12">
-            <button id="load-more" class="border-2 border-lavender-300 text-plum-700 hover:bg-lavender-50 px-8 py-4 text-lg rounded-lg font-medium transition-all bg-transparent">
-                <i class="fas fa-plus mr-2"></i> Load More Reviews
-            </button>
+          <div class="mb-4">
+            <span class="inline-block <?= $tagClass ?> px-3 py-1 rounded-full text-sm font-medium">
+              <?= ucfirst($review['sentiment']); ?>
+            </span>
+          </div>
+
+          <p class="text-gray-700 leading-relaxed"><?= htmlspecialchars($review['comment']); ?></p>
         </div>
+      </div>
+      <?php endforeach; ?>
     </div>
+
+    <!-- Load More Button -->
+    <div class="text-center mt-10">
+      <button
+        id="load-more"
+        class="inline-flex items-center gap-2 px-6 py-3 rounded-md text-white gradient-bg shadow-sm hover:brightness-95 transition">
+        <i class="fas fa-plus text-sm"></i> Load More Reviews
+      </button>
+    </div>
+  </div>
 </section>
 
 
@@ -376,5 +436,37 @@ document.getElementById('show-all-btn').addEventListener('click', () => {
     window.location.href = currentUrl.toString();
 });
 </script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (!logoutBtn) return;
 
+  logoutBtn.addEventListener('click', function (e) {
+    e.preventDefault(); // prevent instant redirect
+
+    Swal.fire({
+      title: 'Sign out?',
+      text: "Are you sure you want to log out of your account?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#4b2840', // plum color from your theme
+      cancelButtonColor: '#a06c9e', // lavender tone
+      confirmButtonText: 'Yes, sign out',
+      cancelButtonText: 'Cancel',
+      background: '#fff',
+      color: '#333',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // proceed with logout
+        window.location.href = 'logout.php';
+      }
+    });
+  });
+});
+</script>
+
+
+</body>
 </html>

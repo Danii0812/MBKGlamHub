@@ -214,154 +214,226 @@ $flash_success = get_flash('success');
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Manage Artists</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Tailwind (CDN) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css">
-  <style>
-    /* Minimal fallback if Tailwind fails to load */
-    .btn { border:1px solid #4f46e5; padding:8px 14px; border-radius:8px; background:#4f46e5; color:#fff; cursor:pointer; }
-    .btn-secondary { border:1px solid #d1d5db; padding:8px 14px; border-radius:8px; background:#fff; color:#111827; }
-    .btn-danger { border:1px solid #dc2626; padding:6px 10px; border-radius:6px; background:#dc2626; color:#fff; cursor:pointer; }
-  </style>
+  <link rel="icon" type="image/png" href="mbk_logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            heading: ['Poppins', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
+          },
+          colors: {
+            lavender: {
+              50: '#F8F5FA', 100: '#F0EBF5', 200: '#E0D6EB', 300: '#D0C1E1', 400: '#C0ACD7',
+              500: '#a06c9e', 600: '#804f7e', 700: '#60325e', 800: '#40153e', 900: '#20001e',
+            },
+            plum: {
+              50: '#F5F0F5', 100: '#EBE0EB', 200: '#D7C0D7', 300: '#C3A0C3', 400: '#AF80AF',
+              500: '#4b2840', 600: '#673f68', 700: '#4A2D4B', 800: '#2E1B2E', 900: '#120912',
+            },
+            'card-pink': '#FF6B6B',
+            'card-orange': '#FFA07A',
+            'card-blue': '#6A82FB',
+            'card-light-blue': '#FCFCFC',
+            'card-green': '#2ECC71',
+            'card-light-green': '#A8E6CF',
+            'card-purple': '#9B59B6',
+            'card-light-purple': '#D2B4DE',
+          },
+          boxShadow: {
+            soft: '0 8px 24px rgba(0,0,0,0.07)',
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
-<body class="bg-gray-50">
 
-  <!-- Include your existing admin sidebar -->
+<body class="bg-lavender-50 font-body overflow-x-hidden">
+  <div class="flex min-h-screen w-full">
 
+    <!-- Sidebar -->
+    <?php include 'admin_sidebar.php'; ?>
 
-  <div class="max-w-6xl mx-auto p-6">
-    <h1 class="text-2xl font-semibold mb-4">Manage Artists</h1>
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col bg-white rounded-tl-3xl shadow-inner overflow-y-auto">
+      <?php include 'admin_header.php'; ?>
 
-    <?php if ($flash_success): ?>
-      <div class="bg-green-100 text-green-700 p-3 rounded mb-4"><?= htmlspecialchars($flash_success) ?></div>
-    <?php endif; ?>
+      <main class="flex-grow bg-white ml-64 pt-6 pb-10 px-8">
+        <div class="max-w-7xl mx-auto">
 
-    <?php if ($errors): ?>
-      <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
-        <?= implode('<br>', array_map('htmlspecialchars', $errors)) ?>
-      </div>
-    <?php endif; ?>
+          <!-- Title -->
+          <h1 class="text-3xl font-heading font-bold text-plum-700 mb-6 flex items-center gap-3">
+            <i class="fas fa-user-pen text-2xl"></i>
+            Manage Artists
+          </h1>
 
-    <!-- CREATE FORM -->
-    <div class="bg-white rounded shadow mb-8">
-      <div class="border-b px-4 py-3 font-medium">Add New Artist</div>
-      <form method="post" class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-        <input name="first_name" class="border p-2 rounded" placeholder="First name" required>
-        <input name="middle_name" class="border p-2 rounded" placeholder="Middle name">
-        <input name="last_name" class="border p-2 rounded" placeholder="Last name" required>
-        <input type="date" name="birth_date" class="border p-2 rounded" placeholder="Birth date">
-        <select name="sex" class="border p-2 rounded">
-          <option value="">Sex</option>
-          <option>Male</option>
-          <option>Female</option>
-          <option>Other</option>
-        </select>
-        <input name="contact_no" class="border p-2 rounded" placeholder="Contact no">
-        <input type="email" name="email" class="border p-2 rounded md:col-span-2" placeholder="Email" required>
+          <!-- Alerts -->
+          <?php if (!empty($flash_success)): ?>
+            <div class="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-800 shadow-sm">
+              <?= htmlspecialchars($flash_success) ?>
+            </div>
+          <?php endif; ?>
 
-        <!-- NEW: password field -->
-        <input type="text" name="password" class="border p-2 rounded md:col-span-2" placeholder="Initial password (leave blank to auto-generate)">
+          <?php if (!empty($errors)): ?>
+            <div class="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-800 shadow-sm">
+              <?= implode('<br>', array_map('htmlspecialchars', $errors)) ?>
+            </div>
+          <?php endif; ?>
 
-        <textarea name="bio" class="border p-2 rounded md:col-span-2" placeholder="Short bio"></textarea>
-        <div class="md:col-span-2">
-          <button type="submit" name="create" value="1"
-                  class="btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">
-            Add Artist
-          </button>
+          <!-- Create Form -->
+          <section class="mb-8 bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div class="border-b border-gray-200 px-5 py-3">
+              <h2 class="text-xl font-heading font-semibold text-plum-700 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus"></i>
+                Add New Artist
+              </h2>
+            </div>
+
+            <form method="post" class="grid grid-cols-1 md:grid-cols-2 gap-4 p-5">
+              <input name="first_name" class="border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2" placeholder="First name" required>
+              <input name="middle_name" class="border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2" placeholder="Middle name">
+              <input name="last_name" class="border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2" placeholder="Last name" required>
+              <input type="date" name="birth_date" class="border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2">
+
+              <select name="sex" class="border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2">
+                <option value="">Sex</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+              </select>
+
+              <input name="contact_no" class="border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2" placeholder="Contact no">
+              <input type="email" name="email" class="md:col-span-2 border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2" placeholder="Email" required>
+              <input type="text" name="password" class="md:col-span-2 border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2" placeholder="Initial password (leave blank to auto-generate)">
+              <textarea name="bio" class="md:col-span-2 border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2" placeholder="Short bio"></textarea>
+
+              <div class="md:col-span-2">
+                <button type="submit" name="create" value="1"
+                        class="inline-flex items-center gap-2 bg-plum-500 hover:bg-plum-600 text-white px-5 py-2.5 rounded-lg shadow-soft transition">
+                  <i class="fa-solid fa-plus"></i>
+                  Add Artist
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <!-- Edit Section -->
+          <?php if (!empty($edit_artist)): ?>
+            <section class="mb-8 bg-white border border-gray-200 rounded-xl shadow-sm">
+              <div class="border-b border-gray-200 px-5 py-3">
+                <h2 class="text-xl font-heading font-semibold text-plum-700 flex items-center gap-2">
+                  <i class="fa-solid fa-user-pen"></i>
+                  Edit Artist:
+                  <span class="font-bold"><?= htmlspecialchars(($edit_artist['first_name'] ?? '').' '.($edit_artist['last_name'] ?? '')) ?></span>
+                </h2>
+              </div>
+
+              <form method="post" class="grid grid-cols-1 md:grid-cols-2 gap-4 p-5">
+                <input type="hidden" name="user_id" value="<?= (int)$edit_artist['user_id'] ?>">
+                <input name="first_name" value="<?= htmlspecialchars($edit_artist['first_name']) ?>" class="border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2" required>
+                <input name="middle_name" value="<?= htmlspecialchars($edit_artist['middle_name'] ?? '') ?>" class="border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2">
+                <input name="last_name" value="<?= htmlspecialchars($edit_artist['last_name']) ?>" class="border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2" required>
+                <input type="date" name="birth_date" value="<?= htmlspecialchars($edit_artist['birth_date'] ?? '') ?>" class="border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2">
+
+                <?php $sexVal = $edit_artist['sex'] ?? ''; ?>
+                <select name="sex" class="border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2">
+                  <option value="">Sex</option>
+                  <option <?= $sexVal==='Male'?'selected':'' ?>>Male</option>
+                  <option <?= $sexVal==='Female'?'selected':'' ?>>Female</option>
+                  <option <?= $sexVal==='Other'?'selected':'' ?>>Other</option>
+                </select>
+
+                <input name="contact_no" value="<?= htmlspecialchars($edit_artist['contact_no'] ?? '') ?>" class="border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2">
+                <input type="email" name="email" value="<?= htmlspecialchars($edit_artist['email']) ?>" class="md:col-span-2 border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2" required>
+                <textarea name="bio" class="md:col-span-2 border border-gray-200 focus:border-lavender-400 rounded-lg px-3 py-2"><?= htmlspecialchars($edit_artist['bio'] ?? '') ?></textarea>
+
+                <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Reset Password (optional)</label>
+                  <input type="text" name="new_password" class="border border-gray-200 rounded-lg px-3 py-2 w-full" placeholder="Enter new password to reset (leave blank to keep current)">
+                </div>
+
+                <div class="md:col-span-2 flex items-center gap-3">
+                  <button type="submit" name="update" value="1"
+                          class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg shadow-soft transition">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save Changes
+                  </button>
+                  <a href="admin_manage_artists.php" class="inline-flex items-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-800 px-5 py-2.5 rounded-lg transition">
+                    <i class="fa-solid fa-xmark"></i>
+                    Cancel
+                  </a>
+                </div>
+              </form>
+            </section>
+          <?php endif; ?>
+
+          <!-- Artists Table -->
+          <section class="bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div class="border-b border-gray-200 px-5 py-3 flex items-center justify-between">
+              <h2 class="text-xl font-heading font-semibold text-plum-700 flex items-center gap-2">
+                <i class="fa-solid fa-users"></i>
+                Artist Accounts
+              </h2>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="bg-lavender-50 text-plum-700 uppercase font-medium">
+                  <tr>
+                    <th class="px-5 py-3 text-left">Name</th>
+                    <th class="px-5 py-3 text-left">Email</th>
+                    <th class="px-5 py-3 text-left">Contact</th>
+                    <th class="px-5 py-3 text-left">Created</th>
+                    <th class="px-5 py-3 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  <?php if (!empty($artists)): ?>
+                    <?php foreach ($artists as $a): ?>
+                      <?php
+                        $name = trim(($a['first_name'] ?? '').' '.($a['middle_name'] ?? '').' '.($a['last_name'] ?? ''));
+                        $name = preg_replace('/\s+/', ' ', $name);
+                      ?>
+                      <tr class="hover:bg-lavender-50/60">
+                        <td class="px-5 py-3"><?= htmlspecialchars($name) ?></td>
+                        <td class="px-5 py-3"><?= htmlspecialchars($a['email']) ?></td>
+                        <td class="px-5 py-3"><?= htmlspecialchars($a['contact_no'] ?? '') ?></td>
+                        <td class="px-5 py-3"><?= htmlspecialchars($a['created_at']) ?></td>
+                        <td class="px-5 py-3">
+                          <div class="flex items-center gap-3">
+                            <a href="admin_manage_artists.php?edit_id=<?= (int)$a['user_id'] ?>" class="text-lavender-600 hover:text-lavender-700 hover:underline">Edit</a>
+                            <form method="post" onsubmit="return confirm('Delete this artist? This may orphan teams they belong to.');" class="inline-block">
+                              <input type="hidden" name="delete_id" value="<?= (int)$a['user_id'] ?>">
+                              <button type="submit" class="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md transition">
+                                <i class="fa-solid fa-trash-can"></i>
+                                Delete
+                              </button>
+                            </form>
+                          </div>
+                        </td>
+                      </tr>
+                    <?php endforeach; ?>
+                  <?php else: ?>
+                    <tr>
+                      <td class="px-5 py-6 text-center text-gray-500" colspan="5">No artists yet.</td>
+                    </tr>
+                  <?php endif; ?>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
         </div>
-      </form>
+      </main>
     </div>
-
-    <!-- EDIT PANEL (appears when ?edit_id=...) -->
-    <?php if ($edit_artist): ?>
-    <div class="bg-white rounded shadow mb-8">
-      <div class="border-b px-4 py-3 font-medium">
-        Edit Artist: <?= htmlspecialchars(($edit_artist['first_name'] ?? '').' '.($edit_artist['last_name'] ?? '')) ?>
-      </div>
-      <form method="post" class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-        <input type="hidden" name="user_id" value="<?= (int)$edit_artist['user_id'] ?>">
-        <input name="first_name" class="border p-2 rounded" value="<?= htmlspecialchars($edit_artist['first_name']) ?>" placeholder="First name" required>
-        <input name="middle_name" class="border p-2 rounded" value="<?= htmlspecialchars($edit_artist['middle_name'] ?? '') ?>" placeholder="Middle name">
-        <input name="last_name" class="border p-2 rounded" value="<?= htmlspecialchars($edit_artist['last_name']) ?>" placeholder="Last name" required>
-        <input type="date" name="birth_date" class="border p-2 rounded" value="<?= htmlspecialchars($edit_artist['birth_date'] ?? '') ?>" placeholder="Birth date">
-        <?php $sexVal = $edit_artist['sex'] ?? ''; ?>
-        <select name="sex" class="border p-2 rounded">
-          <option value="">Sex</option>
-          <option <?= $sexVal==='Male'?'selected':'' ?>>Male</option>
-          <option <?= $sexVal==='Female'?'selected':'' ?>>Female</option>
-          <option <?= $sexVal==='Other'?'selected':'' ?>>Other</option>
-        </select>
-        <input name="contact_no" class="border p-2 rounded" value="<?= htmlspecialchars($edit_artist['contact_no'] ?? '') ?>" placeholder="Contact no">
-        <input type="email" name="email" class="border p-2 rounded md:col-span-2" value="<?= htmlspecialchars($edit_artist['email']) ?>" placeholder="Email" required>
-        <textarea name="bio" class="border p-2 rounded md:col-span-2" placeholder="Short bio"><?= htmlspecialchars($edit_artist['bio'] ?? '') ?></textarea>
-
-        <div class="md:col-span-2 bg-gray-50 border rounded p-3">
-          <label class="block text-sm font-medium mb-1">Reset Password (optional)</label>
-          <input type="text" name="new_password" class="border p-2 rounded w-full" placeholder="Enter new password to reset (leave blank to keep current)">
-        </div>
-
-        <div class="md:col-span-2 flex items-center gap-3">
-          <!-- VISIBLE Save button -->
-          <button type="submit" name="update" value="1"
-                  class="btn bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded">
-            Save Changes
-          </button>
-          <a href="admin_manage_artists.php"
-             class="btn-secondary border px-4 py-2 rounded hover:bg-gray-100">
-            Cancel
-          </a>
-        </div>
-      </form>
-    </div>
-    <?php endif; ?>
-
-    <!-- LIST TABLE -->
-    <div class="bg-white rounded shadow">
-      <div class="border-b px-4 py-3 font-medium">Artist Accounts</div>
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-          <thead class="bg-gray-100">
-            <tr>
-              <th class="text-left p-3">Name</th>
-              <th class="text-left p-3">Email</th>
-              <th class="text-left p-3">Contact</th>
-              <th class="text-left p-3">Created</th>
-              <th class="text-left p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($artists as $a): ?>
-              <?php
-                $name = trim(($a['first_name'] ?? '').' '.($a['middle_name'] ?? '').' '.($a['last_name'] ?? ''));
-                $name = preg_replace('/\s+/', ' ', $name);
-              ?>
-              <tr class="border-t">
-                <td class="p-3"><?= htmlspecialchars($name) ?></td>
-                <td class="p-3"><?= htmlspecialchars($a['email']) ?></td>
-                <td class="p-3"><?= htmlspecialchars($a['contact_no'] ?? '') ?></td>
-                <td class="p-3"><?= htmlspecialchars($a['created_at']) ?></td>
-                <td class="p-3 flex items-center gap-3">
-                  <a class="text-indigo-600 hover:underline"
-                     href="admin_manage_artists.php?edit_id=<?= (int)$a['user_id'] ?>">Edit</a>
-                  <form method="post"
-                        onsubmit="return confirm('Delete this artist? This may orphan teams they belong to.');"
-                        style="display:inline;">
-                    <input type="hidden" name="delete_id" value="<?= (int)$a['user_id'] ?>">
-                    <button type="submit" class="btn-danger">Delete</button>
-                  </form>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-            <?php if (!$artists): ?>
-              <tr><td class="p-3" colspan="5">No artists yet.</td></tr>
-            <?php endif; ?>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
   </div>
 </body>
 </html>

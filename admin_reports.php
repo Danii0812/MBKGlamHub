@@ -1,5 +1,20 @@
 <?php
-include 'db.php'; // adjust path if needed
+session_start();
+
+// Block caching on authenticated pages
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: Sat, 26 Oct 1997 05:00:00 GMT');
+
+// If not logged in or not admin, go to login
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
+    header('Location: login.php');
+    exit;
+}
+
+include 'db.php'; // now safe to include
+
 
 // Total Revenue (Current Month)
 $query = "
@@ -169,7 +184,7 @@ $teamBookingsJSON = json_encode($teamBookings);
     <meta charset="UTF-8" />
     <title>Reports Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Fonts, Tailwind, Font Awesome -->
+    <link rel="icon" type="image/png" href="mbk_logo.png" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>

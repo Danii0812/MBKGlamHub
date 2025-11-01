@@ -85,7 +85,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MBK GlamHub</title>
+  <title>MBK GlamHub | Sign Up </title>
+  <link rel="icon" type="image/png" href="mbk_logo.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>
@@ -138,9 +139,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     html {
       scroll-behavior: smooth;
     }
+
+
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-lavender-50 via-lavender-100 to-lavender-200">
+<body class="min-h-screen bg-white animate-fadeIn">
 
 <!-- Header -->
 <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-lavender-200">
@@ -283,33 +286,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <div class="mt-8 text-center">
         <p class="text-gray-600">
           Already have an account?
-          <a href="login.html" class="text-plum-600 hover:text-plum-700 font-medium transition-colors">
+          <a href="login.php" class="text-plum-600 hover:text-plum-700 font-medium transition-colors">
             Sign In
           </a>
         </p>
       </div>
 
       <!-- Divider -->
-      <div class="mt-8">
-        <div class="relative">
-          <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-lavender-300"></div>
-          </div>
-          <div class="relative flex justify-center text-sm">
-            <span class="px-2 bg-white text-gray-500">Or continue with</span>
-          </div>
-        </div>
 
-        <!-- Social Buttons -->
-        <div class="mt-6 grid grid-cols-2 gap-3">
-          <button class="w-full inline-flex justify-center py-3 px-4 border border-lavender-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-lavender-50 transition-colors">
-            <i class="fab fa-google text-red-500 mr-2"></i> Google
-          </button>
-          <button class="w-full inline-flex justify-center py-3 px-4 border border-lavender-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-lavender-50 transition-colors">
-            <i class="fab fa-facebook text-blue-600 mr-2"></i> Facebook
-          </button>
-        </div>
-      </div>
 
       <!-- Terms -->
         <div class="mt-8 text-center text-sm text-gray-600">

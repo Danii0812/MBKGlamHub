@@ -178,7 +178,7 @@ if (empty($latest_notifications)) {
     <meta charset="UTF-8" />
     <title>Artist Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <link rel="icon" type="image/png" href="mbk_logo.png" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -239,15 +239,7 @@ if (empty($latest_notifications)) {
     <!-- Main Content Area -->
 <div class="ml-64 flex-1 flex flex-col bg-white rounded-tl-3xl shadow-inner">
         <!-- Top Header / Navbar -->
-        <header class="bg-white p-6 flex items-center justify-between sticky top-0 z-10 border-b border-gray-100">
-            <div class="relative flex-1 max-w-md mr-4">
-                <input type="text" placeholder="Search bookings..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-lavender-300">
-                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            </div>
-            <div class="flex items-center space-x-4">
-                
-            </div>
-        </header>
+
 
         <!-- Dashboard Content -->
         <main class="flex-1 p-10 bg-white">
@@ -263,19 +255,67 @@ if (empty($latest_notifications)) {
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Assigned Bookings -->
-                <div id="assigned-bookings-section" class="bg-white shadow-md rounded-xl overflow-hidden border border-gray-200 p-6">
-                    <h2 class="text-xl font-heading font-bold text-plum-700 mb-4">Assigned Bookings</h2>
-                    <div class="grid w-full grid-cols-2 mb-4 bg-gray-100 rounded-lg p-1">
-                        <button data-tab="upcoming" class="tab-trigger px-4 py-2 rounded-md text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-plum-700 transition">Ongoing Bookings</button>
-                        <button data-tab="past" class="tab-trigger px-4 py-2 rounded-md text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-plum-700 transition">Past Bookings</button>
-                    </div>
-                    <div id="upcoming-bookings-content" class="tab-content mt-4" data-tab-content="upcoming">
-                        <!-- Upcoming bookings will be rendered here by JavaScript -->
-                    </div>
-                    <div id="past-bookings-content" class="tab-content mt-4 hidden" data-tab-content="past">
-                        <!-- Past bookings will be rendered here by JavaScript -->
-                    </div>
-                </div>
+<div id="assigned-bookings-section" class="bg-white shadow-md rounded-xl overflow-hidden border border-gray-200 p-6">
+  <h2 class="text-xl font-heading font-bold text-plum-700 mb-4">Assigned Bookings</h2>
+
+  <div class="grid w-full grid-cols-2 mb-4 bg-gray-100 rounded-lg p-1" id="bookings-tablist">
+    <!-- Default active tab -->
+    <button data-tab="upcoming" class="tab-trigger px-4 py-2 rounded-md text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-plum-700 transition" data-state="active">
+      Ongoing Bookings
+    </button>
+    <button data-tab="past" class="tab-trigger px-4 py-2 rounded-md text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-plum-700 transition">
+      Past Bookings
+    </button>
+  </div>
+
+  <!-- Visible by default -->
+  <div id="upcoming-bookings-content" class="tab-content mt-4" data-tab-content="upcoming">
+    <!-- Upcoming bookings will be rendered here by JavaScript -->
+  </div>
+
+  <!-- Hidden by default -->
+  <div id="past-bookings-content" class="tab-content mt-4 hidden" data-tab-content="past">
+    <!-- Past bookings will be rendered here by JavaScript -->
+  </div>
+</div>
+
+<script>
+  (function () {
+    const section = document.getElementById('assigned-bookings-section');
+    const buttons = section.querySelectorAll('.tab-trigger');
+    const contents = section.querySelectorAll('.tab-content');
+
+    function activateTab(tabName) {
+      // Toggle button active states
+      buttons.forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+          btn.setAttribute('data-state', 'active');
+        } else {
+          btn.removeAttribute('data-state');
+        }
+      });
+
+      // Toggle content visibility
+      contents.forEach(panel => {
+        if (panel.dataset.tabContent === tabName) {
+          panel.classList.remove('hidden');
+        } else {
+          panel.classList.add('hidden');
+        }
+      });
+    }
+
+    // Handle tab clicks
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => activateTab(btn.dataset.tab));
+    });
+
+    // Initialize with the default active tab
+    const defaultActive = [...buttons].find(b => b.getAttribute('data-state') === 'active');
+    activateTab(defaultActive ? defaultActive.dataset.tab : buttons[0].dataset.tab);
+  })();
+</script>
+
 
                 <div class="space-y-6">
                     <!-- Notifications -->

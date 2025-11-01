@@ -3,13 +3,17 @@ session_start();
 require 'db.php';
 
 
-if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1; // Dummy user ID
-    $_SESSION['role'] = 'admin'; // Dummy role
-    $_SESSION['user_name'] = 'Admin User'; // Dummy user name
-}
+// prevent caching of authenticated pages
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: Sat, 26 Oct 1997 05:00:00 GMT');
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+require 'db.php';
+
+// ✅ DO NOT seed a dummy user here
+
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? null) !== 'admin') {
     header("Location: login.php");
     exit;
 }
@@ -76,6 +80,7 @@ $whereSql = $where ? "WHERE " . implode(" AND ", $where) : "";
 $query = "
     SELECT 
         bookings.*, 
+        payment_proof_path,
         users.first_name, 
         users.middle_name, 
         users.last_name 
@@ -94,7 +99,7 @@ $bookings = $conn->query($query);
     <meta charset="UTF-8" />
     <title>Manage Bookings</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Fonts, Tailwind, Font Awesome -->
+    <link rel="icon" type="image/png" href="mbk_logo.png" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -239,7 +244,7 @@ $bookings = $conn->query($query);
         Apply
     </button>
 </form>
-                <table class="min-w-full text-sm text-left">
+                <table id="bookingsTable" class="min-w-full text-sm text-left">
                     <thead class="bg-lavender-50 text-plum-700 uppercase font-medium">
                         <tr>
                             <th class="px-6 py-3">Client Name</th>
@@ -305,6 +310,15 @@ $bookings = $conn->query($query);
                                             Complete
                                         </a>
                                     <?php endif; ?>
+
+                                                                        <!-- ✅ New: View Proof of Payment Button -->
+                                    <?php if (!empty($row['payment_proof_path'])): ?>
+                                        <a href="uploads/payment_proofs/<?= htmlspecialchars(basename($row['payment_proof_path'])) ?>" 
+                                        target="_blank"
+                                        class="bg-purple-600 hover:bg-purple-700 text-white text-sm px-3 py-1 rounded-md transition">
+                                        <i class="fas fa-image mr-1"></i> View Proof
+                                        </a>
+                                    <?php endif; ?>
                                 </td>
 
 
@@ -312,6 +326,7 @@ $bookings = $conn->query($query);
                         <?php endwhile; ?>
                     </tbody>
                 </table>
+                <div id="bookingPagination" class="flex justify-center items-center gap-2 mt-6"></div>
             </div>
         </main>
     </div>
@@ -388,3 +403,136 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 </script>
+<script>
+(function () {
+  const PER_PAGE = 10;
+  const table = document.getElementById('bookingsTable');
+  const pager = document.getElementById('bookingPagination');
+  if (!table || !pager) return;
+
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return;
+
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+  let current = 1;
+
+  function clamp(n, min, max) { return Math.min(Math.max(n, min), max); }
+
+  function getVisiblePages(curr, total) {
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const pages = new Set([1, total, curr]);
+    if (curr - 1 > 1) pages.add(curr - 1);
+    if (curr + 1 < total) pages.add(curr + 1);
+    if (curr <= 4) { pages.add(2); pages.add(3); pages.add(4); }
+    if (curr >= total - 3) { pages.add(total - 1); pages.add(total - 2); pages.add(total - 3); }
+
+    const sorted = Array.from(pages).sort((a, b) => a - b);
+    const out = [];
+    for (let i = 0; i < sorted.length; i++) {
+      out.push(sorted[i]);
+      if (i < sorted.length - 1 && sorted[i + 1] !== sorted[i] + 1) out.push(-1);
+    }
+    return out;
+  }
+
+  function updateRows(page) {
+    const start = (page - 1) * PER_PAGE;
+    const end = start + PER_PAGE;
+    rows.forEach((tr, i) => tr.classList.toggle('hidden', !(i >= start && i < end)));
+  }
+
+  function makeButton({ html, label, classes, disabled = false, onClick = null, dataset = {} }) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.innerHTML = html;
+    btn.className = classes;
+    btn.setAttribute('aria-label', label);
+    if (disabled) {
+      btn.disabled = true;
+      btn.classList.add('opacity-40', 'cursor-not-allowed');
+    }
+    if (onClick) btn.addEventListener('click', onClick);
+    Object.entries(dataset).forEach(([k, v]) => btn.dataset[k] = v);
+    return btn;
+  }
+
+  function renderPager() {
+    pager.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    const useTriangles = totalPages > 5;
+    const prevSymbol = useTriangles ? '◀' : '&lt;';
+    const nextSymbol = useTriangles ? '▶' : '&gt;';
+
+    // Prev
+    pager.appendChild(makeButton({
+      html: prevSymbol,
+      label: 'Previous page',
+      classes: 'text-plum-700 text-lg font-bold hover:text-plum-900 transition-colors',
+      disabled: current === 1,
+      onClick: () => showPage(current - 1)
+    }));
+
+    // Dots
+    const items = getVisiblePages(current, totalPages);
+    items.forEach(item => {
+      if (item === -1) {
+        const dots = document.createElement('span');
+        dots.textContent = '…';
+        dots.className = 'px-1.5 select-none text-gray-400 text-lg';
+        pager.appendChild(dots);
+      } else {
+        const isActive = item === current;
+        const dot = makeButton({
+          html: '',
+          label: 'Go to page ' + item,
+          classes: [
+            'dot-btn w-2.5 h-2.5 rounded-full transform transition-all duration-300 ease-out',
+            isActive
+              ? 'bg-plum-600 scale-125 shadow-md opacity-100'
+              : 'bg-gray-300 hover:bg-gray-400 scale-100 opacity-80',
+          ].join(' '),
+          dataset: { page: String(item) },
+          onClick: () => showPage(item)
+        });
+        pager.appendChild(dot);
+      }
+    });
+
+    // Next
+    pager.appendChild(makeButton({
+      html: nextSymbol,
+      label: 'Next page',
+      classes: 'text-plum-700 text-lg font-bold hover:text-plum-900 transition-colors',
+      disabled: current === totalPages,
+      onClick: () => showPage(current + 1)
+    }));
+  }
+
+  function animateDots(newPage) {
+    const allDots = pager.querySelectorAll('.dot-btn');
+    allDots.forEach(dot => {
+      const pageNum = Number(dot.dataset.page);
+      const isActive = pageNum === newPage;
+      dot.style.transition = 'all 0.35s ease';
+      dot.style.transform = isActive ? 'scale(1.3)' : 'scale(1)';
+      dot.style.opacity = isActive ? '1' : '0.6';
+      dot.style.backgroundColor = isActive ? '#4b2840' : '#d1d5db'; // plum / gray
+      dot.style.boxShadow = isActive ? '0 0 6px rgba(75, 40, 64, 0.4)' : 'none';
+    });
+  }
+
+  function showPage(page) {
+    current = clamp(page, 1, totalPages);
+    updateRows(current);
+    renderPager();
+    animateDots(current);
+  }
+
+  showPage(1);
+})();
+</script>
+
+

@@ -140,11 +140,10 @@ if ($res = $conn->query($teamSql)) {
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Manage Teams - Admin</title>
+    <title>Manage Teams</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Google Fonts -->
+    <link rel="icon" type="image/png" href="mbk_logo.png" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS with custom font and color config -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -273,17 +272,30 @@ if ($res = $conn->query($teamSql)) {
             <div class="bg-white shadow-md rounded-xl border border-gray-200 p-6">
                 <h2 class="text-xl font-heading font-bold text-plum-700 mb-4">Existing Teams</h2>
                 <div id="teamsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Teams will be rendered here by JavaScript -->
                     <?php if (!empty($teams)): ?>
                         <?php foreach ($teams as $team): ?>
                             <div class="border border-gray-200 rounded-lg p-4 shadow-sm bg-white">
                             <?php
+                                // Profile for this team
                                 $profileQuery = $conn->prepare("SELECT profile_image FROM teams WHERE team_id = ?");
                                 $profileQuery->bind_param("i", $team['team_id']);
                                 $profileQuery->execute();
                                 $profileResult = $profileQuery->get_result()->fetch_assoc();
                                 $profilePath = $profileResult['profile_image'] ?? null;
                                 $profileQuery->close();
+
+                                // Gallery for this team WITH upload_id (needed for removal)
+                                $imgs = [];
+                                $imgQuery = $conn->prepare("SELECT upload_id, image_path FROM team_uploads WHERE team_id = ?");
+                                $imgQuery->bind_param("i", $team['team_id']);
+                                $imgQuery->execute();
+                                $imgResult = $imgQuery->get_result();
+                                while ($rowImg = $imgResult->fetch_assoc()) {
+                                    $imgs[] = $rowImg; // ['upload_id'=>..., 'image_path'=>...]
+                                }
+                                $imgQuery->close();
+
+                                $imgsJson = htmlspecialchars(json_encode($imgs), ENT_QUOTES, 'UTF-8');
                             ?>
                             <?php if ($profilePath): ?>
                                 <img src="<?= htmlspecialchars($profilePath) ?>" 
@@ -297,21 +309,15 @@ if ($res = $conn->query($teamSql)) {
 
                             <h3 class="text-lg font-semibold text-plum-700 text-center mb-2"><?= htmlspecialchars($team['team_name']) ?></h3>
                             <h3 class="text-lg font-semibold text-plum-700 mb-2"><?= htmlspecialchars($team['team_name']) ?></h3>
+
                             <div class="flex flex-wrap gap-2 mb-3">
-                                <?php
-                                $imgQuery = $conn->prepare("SELECT image_path FROM team_uploads WHERE team_id = ?");
-                                $imgQuery->bind_param("i", $team['team_id']);
-                                $imgQuery->execute();
-                                $imgResult = $imgQuery->get_result();
-                                if ($imgResult->num_rows > 0) {
-                                    while ($img = $imgResult->fetch_assoc()) {
-                                        echo '<img src="' . htmlspecialchars($img['image_path']) . '" class="w-20 h-20 object-cover rounded-lg border" alt="Team Image">';
-                                    }
-                                } else {
-                                    echo '<p class="text-sm text-gray-500">No images uploaded.</p>';
-                                }
-                                $imgQuery->close();
-                                ?>
+                                <?php if (!empty($imgs)): ?>
+                                    <?php foreach ($imgs as $img): ?>
+                                        <img src="<?= htmlspecialchars($img['image_path']) ?>" class="w-20 h-20 object-cover rounded-lg border" alt="Team Image">
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <p class="text-sm text-gray-500">No images uploaded.</p>
+                                <?php endif; ?>
                             </div>
 
                             <p class="text-sm text-gray-600 mb-1">
@@ -326,6 +332,7 @@ if ($res = $conn->query($teamSql)) {
                                 data-team-name="<?= htmlspecialchars($team['team_name']) ?>"
                                 data-makeup-id="<?= $team['makeup_artist_id'] ?>"
                                 data-hair-id="<?= $team['hairstylist_id'] ?>"
+                                data-images='<?= $imgsJson ?>'
                             >
                                 <i class="fa fa-pen mr-1"></i> Edit
                             </button>
@@ -342,7 +349,7 @@ if ($res = $conn->query($teamSql)) {
 
     <!-- Edit Team Modal -->
 <div id="editTeamModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50">
-  <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
+  <div class="bg-white rounded-xl shadow-lg w-full max-w-xl p-6 relative">
     <button id="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
       <i class="fa fa-times"></i>
     </button>
@@ -355,10 +362,23 @@ if ($res = $conn->query($teamSql)) {
         <input type="text" name="team_name" id="editTeamName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
       </div>
 
-    <div>
+      <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Profile Image</label>
         <input type="file" name="teamProfile" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-    </div>
+      </div>
+
+      <!-- Existing Portfolio (will be injected) -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Existing Portfolio</label>
+        <div id="editGallery" class="grid grid-cols-3 sm:grid-cols-4 gap-3"></div>
+        <p id="noGalleryMsg" class="text-xs text-gray-500 mt-1 hidden">No images uploaded for this team.</p>
+        <p class="text-xs text-gray-500 mt-1">Tick “Remove” on photos you want to delete.</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Add More Images (Max 6)</label>
+        <input type="file" name="teamImages[]" multiple accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+      </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Makeup Artist</label>
@@ -379,8 +399,6 @@ if ($res = $conn->query($teamSql)) {
           <?php endforeach; ?>
         </select>
       </div>
-
-    <input type="file" name="teamImages[]" multiple accept="image/*">
 
       <div class="flex justify-end mt-6">
         <button type="submit" class="bg-plum-500 hover:bg-plum-600 text-white px-5 py-2 rounded-lg font-semibold">
@@ -409,7 +427,6 @@ document.addEventListener("DOMContentLoaded", function() {
       icon.classList.remove('fa-plus');
       icon.classList.add('fa-spinner', 'fa-spin');
     }
-
   });
 
   window.addEventListener("pageshow", function(event) {
@@ -427,7 +444,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 document.addEventListener("DOMContentLoaded", function() {
-    // Edit Modal Controls
+    // Edit Modal Controls (existing functionality kept)
     const modal = document.getElementById("editTeamModal");
     const closeModal = document.getElementById("closeModal");
     const editButtons = document.querySelectorAll(".editTeamBtn");
@@ -437,13 +454,44 @@ document.addEventListener("DOMContentLoaded", function() {
     const editMakeupArtist = document.getElementById("editMakeupArtist");
     const editHairstylist = document.getElementById("editHairstylist");
 
+    // NEW: gallery preview nodes
+    const editGallery = document.getElementById("editGallery");
+    const noGalleryMsg = document.getElementById("noGalleryMsg");
+
+    function renderGallery(images) {
+      editGallery.innerHTML = "";
+      if (!images || images.length === 0) {
+        noGalleryMsg.classList.remove("hidden");
+        return;
+      }
+      noGalleryMsg.classList.add("hidden");
+
+      images.forEach(img => {
+        const wrap = document.createElement("div");
+        wrap.className = "relative";
+        wrap.innerHTML = `
+          <img src="${img.image_path}" class="w-full aspect-square object-cover rounded-lg border" alt="Team Image">
+          <label class="mt-1 flex items-center gap-2 text-xs text-gray-700">
+            <input type="checkbox" name="remove_images[]" value="${img.upload_id}" class="rounded border-gray-300">
+            <span>Remove</span>
+          </label>
+        `;
+        editGallery.appendChild(wrap);
+      });
+    }
+
     editButtons.forEach(btn => {
         btn.addEventListener("click", () => {
-        modal.classList.remove("hidden");
-        editTeamId.value = btn.dataset.teamId;
-        editTeamName.value = btn.dataset.teamName;
-        editMakeupArtist.value = btn.dataset.makeupId;
-        editHairstylist.value = btn.dataset.hairId;
+          modal.classList.remove("hidden");
+          editTeamId.value = btn.dataset.teamId;
+          editTeamName.value = btn.dataset.teamName;
+          editMakeupArtist.value = btn.dataset.makeupId;
+          editHairstylist.value = btn.dataset.hairId;
+
+          // NEW: load portfolio images from data-images (JSON with upload_id, image_path)
+          let imgs = [];
+          try { imgs = JSON.parse(btn.dataset.images || "[]"); } catch(e) { imgs = []; }
+          renderGallery(imgs);
         });
     });
 
