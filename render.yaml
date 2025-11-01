@@ -1,0 +1,10 @@
+services:
+  - type: worker
+    name: ml-model-trainer
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python evaluate_and_train_rf.py
+    envVars:
+      - key: DATABASE_URL
+        value: mysql+pymysql://RENDER_DB_USER:RENDER_DB_PASSWORD@RENDER_DB_HOST:RENDER_DB_PORT/RENDER_DB_NAME
