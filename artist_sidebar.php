@@ -28,7 +28,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <div>
         <!-- Logo/Admin Panel Title -->
         <div class="mb-8 px-3">
-            <h2 class="text-2xl font-heading font-bold text-plum-700">Make Up By Kyleen</h2>
+            <h2 class="text-2xl font-heading font-bold text-plum-700">MBK GlamHub</h2>
         </div>
 
         <!-- User Profile -->

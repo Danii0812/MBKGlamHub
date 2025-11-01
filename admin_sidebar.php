@@ -47,8 +47,7 @@ if ($result && $row = $result->fetch_assoc()) {
                 "admin_manage_artists.php" => ["Manage Artists", "fa-users"],
                 "admin_manage_packages.php" => ["Manage Packages", "fa-box-open"],
                 "admin_reports.php" => ["Reports", "fa-chart-line"],
-                "admin_site_settings.php" => ["Site Settings", "fa-cog"],
-                "admin_reviews.php" => ["User Reviews", "fas fa-commenting"],
+                "admin_reviews.php" => ["Client Reviews", "fas fa-commenting"],
             ];
 
             foreach ($links as $file => [$label, $icon]) {

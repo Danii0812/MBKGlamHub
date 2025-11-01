@@ -2,6 +2,11 @@
 session_start();
 include 'db.php';
 
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: Sat, 26 Oct 1997 05:00:00 GMT');
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
@@ -56,7 +61,7 @@ $stmt->close();
     <meta charset="UTF-8" />
     <title>Artist Bookings</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Fonts, Tailwind, Font Awesome -->
+    <link rel="icon" type="image/png" href="mbk_logo.png" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -118,15 +123,7 @@ $stmt->close();
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col bg-white rounded-tl-3xl shadow-inner">
         <!-- Top Header / Navbar -->
-        <header class="bg-white p-6 flex items-center justify-between sticky top-0 z-10 border-b border-gray-100 ml-64">
-            <div class="relative flex-1 max-w-md mr-4">
-                <input type="text" placeholder="Search bookings..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-lavender-300">
-                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            </div>
-            <div class="flex items-center space-x-4">
 
-            </div>
-        </header>
 
         <!-- Bookings Content -->
         <main class="flex-1 p-10 bg-white ml-64">
@@ -137,6 +134,68 @@ $stmt->close();
             </h1>
 
             <div class="bg-white shadow-md rounded-xl overflow-hidden border border-gray-200 p-6">
+              <!-- Filters -->
+<div class="mb-4 grid gap-3 md:grid-cols-6 sm:grid-cols-2">
+  <!-- Free text search -->
+  <div>
+    <label class="block text-sm text-gray-600 mb-1">Search</label>
+    <input id="flt-text" type="text" placeholder="Client, address, service…"
+           class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-plum-300">
+  </div>
+
+  <!-- Status -->
+  <div>
+    <label class="block text-sm text-gray-600 mb-1">Status</label>
+    <select id="flt-status" class="w-full border border-gray-300 rounded-md px-3 py-2">
+      <option value="">All</option>
+      <option value="0">Pending</option>
+      <option value="1">Ongoing</option>
+      <option value="3">Completed</option>
+    </select>
+  </div>
+
+  <!-- Payment -->
+  <div>
+    <label class="block text-sm text-gray-600 mb-1">Payment</label>
+    <select id="flt-payment" class="w-full border border-gray-300 rounded-md px-3 py-2">
+      <option value="">All</option>
+      <option value="pending">Pending</option>
+      <option value="paid">Paid</option>
+    </select>
+  </div>
+
+  <!-- Event type (dynamic options populated by JS) -->
+  <div>
+    <label class="block text-sm text-gray-600 mb-1">Event Type</label>
+    <select id="flt-event" class="w-full border border-gray-300 rounded-md px-3 py-2">
+      <option value="">All</option>
+    </select>
+  </div>
+
+  <!-- Date from -->
+  <div>
+    <label class="block text-sm text-gray-600 mb-1">Date From</label>
+    <input id="flt-from" type="date"
+           class="w-full border border-gray-300 rounded-md px-3 py-2">
+  </div>
+
+  <!-- Date to -->
+  <div>
+    <label class="block text-sm text-gray-600 mb-1">Date To</label>
+    <input id="flt-to" type="date"
+           class="w-full border border-gray-300 rounded-md px-3 py-2">
+  </div>
+</div>
+
+<div class="flex items-center gap-2 mb-4">
+  <button id="flt-apply" class="bg-plum-600 hover:bg-plum-700 text-white px-4 py-2 rounded-md">
+    Apply Filters
+  </button>
+  <button id="flt-reset" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md">
+    Reset
+  </button>
+</div>
+
                 <div class="grid w-full grid-cols-2 mb-4 bg-gray-100 rounded-lg p-1">
                     <button data-tab="upcoming" class="tab-trigger px-4 py-2 rounded-md text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-plum-700 transition">Ongoing Bookings</button>
                     <button data-tab="past" class="tab-trigger px-4 py-2 rounded-md text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-plum-700 transition">Completed Bookings</button>
@@ -174,47 +233,26 @@ tabButtons.forEach((btn) => {
     content.classList.remove("hidden");
   });
 });
-// ---- categorize bookingsData into upcoming and past ----
 const upcomingBookings = [];
 const pastBookings = [];
 
 bookingsData.forEach(b => {
-  // build a reliable Date object
   let bookingDateObj = null;
   if (b.booking_date) {
-    // prefer ISO: YYYY-MM-DDTHH:MM:SS
     let dtStr = b.booking_date;
-    if (b.booking_time) {
-      // if time is already in HH:MM:SS or HH:MM, this will work
-      dtStr = `${b.booking_date}T${b.booking_time}`;
-    }
+    if (b.booking_time) dtStr = `${b.booking_date}T${b.booking_time}`;
     bookingDateObj = new Date(dtStr);
-    if (isNaN(bookingDateObj)) {
-      // fallback to date-only parsing if time parsing failed
-      bookingDateObj = new Date(b.booking_date);
-    }
+    if (isNaN(bookingDateObj)) bookingDateObj = new Date(b.booking_date);
   } else {
-    bookingDateObj = new Date(); // fallback
+    bookingDateObj = new Date();
   }
 
-  const today = new Date();
-  // zero-out time for "today" comparison if you want date-only comparison:
-  // today.setHours(0,0,0,0);
-
-  const serviceName = b.package_name && b.package_name.length
+  const serviceName = b.package_name?.length
     ? b.package_name
-    : [
-        b.makeup_style || '',
-        b.hair_style ? (' & ' + b.hair_style) : ''
-      ].join('').trim() || 'Service';
+    : `${b.makeup_style || ''}${b.hair_style ? (' & ' + b.hair_style) : ''}`.trim() || 'Service';
 
-  const eventType = b.package_event_type && b.package_event_type.length
-    ? b.package_event_type
-    : (b.event_type || '');
-
-  const priceRange = b.package_price_range && b.package_price_range.length
-    ? b.package_price_range
-    : (b.client_price_range || '');
+  const eventType = b.package_event_type?.length ? b.package_event_type : (b.event_type || '');
+  const priceRange = b.package_price_range?.length ? b.package_price_range : (b.client_price_range || '');
 
   const booking = {
     booking_id: b.booking_id,
@@ -228,10 +266,9 @@ bookingsData.forEach(b => {
     price_range: priceRange,
     team: b.team_name || '',
     status: parseInt(b.is_confirmed, 10),
-    payment_status: b.payment_status || ''
+    payment_status: (b.payment_status || '').toLowerCase()
   };
 
-  // classify based on booking status
   if (booking.status === 0 || booking.status === 1) {
     upcomingBookings.push(booking);
   } else if (booking.status === 3) {
@@ -239,7 +276,84 @@ bookingsData.forEach(b => {
   }
 });
 
-// ---- render function (keeps your UI) ----
+// ---------- FILTERS ----------
+const qs = id => document.getElementById(id);
+
+// Populate event types dynamically
+(function populateEventTypes() {
+  const sel = qs('flt-event');
+  if (!sel) return;
+  const all = [...upcomingBookings, ...pastBookings];
+  const uniq = Array.from(new Set(all.map(b => (b.event_type || '').trim()).filter(Boolean))).sort();
+  uniq.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = v;
+    sel.appendChild(opt);
+  });
+})();
+
+function normalize(str) { return (str || '').toString().toLowerCase(); }
+
+function inDateRange(dateObj, fromStr, toStr) {
+  if (!fromStr && !toStr) return true;
+  const d = new Date(dateObj);
+  if (fromStr) {
+    const f = new Date(fromStr);
+    if (d < new Date(f.getFullYear(), f.getMonth(), f.getDate())) return false;
+  }
+  if (toStr) {
+    const t = new Date(toStr);
+    // include the end day
+    const end = new Date(t.getFullYear(), t.getMonth(), t.getDate(), 23, 59, 59, 999);
+    if (d > end) return false;
+  }
+  return true;
+}
+
+function applyFiltersToList(list) {
+  const txt = normalize(qs('flt-text')?.value);
+  const status = qs('flt-status')?.value;       // "", "0", "1", "3"
+  const payment = normalize(qs('flt-payment')?.value); // "", "pending", "paid"
+  const eventType = qs('flt-event')?.value;     // "" or exact event name
+  const from = qs('flt-from')?.value;           // "YYYY-MM-DD" or ""
+  const to = qs('flt-to')?.value;               // "YYYY-MM-DD" or ""
+
+  return list.filter(b => {
+    // text search against several fields
+    const hay = `${b.client} ${b.address} ${b.service} ${b.event_type} ${b.team} ${b.price_range}`.toLowerCase();
+    if (txt && !hay.includes(txt)) return false;
+
+    if (status !== '' && String(b.status) !== status) return false;
+    if (payment && normalize(b.payment_status) !== payment) return false;
+    if (eventType && b.event_type !== eventType) return false;
+    if (!inDateRange(b.dateObj, from, to)) return false;
+
+    return true;
+  });
+}
+
+function renderAll() {
+  renderBookings(applyFiltersToList(upcomingBookings), "upcoming-bookings-content");
+  renderBookings(applyFiltersToList(pastBookings), "past-bookings-content");
+}
+
+// Wire up buttons
+qs('flt-apply')?.addEventListener('click', renderAll);
+qs('flt-reset')?.addEventListener('click', () => {
+  ['flt-text','flt-status','flt-payment','flt-event','flt-from','flt-to'].forEach(id => {
+    const el = qs(id);
+    if (!el) return;
+    if (el.tagName === 'INPUT') el.value = '';
+    if (el.tagName === 'SELECT') el.value = '';
+  });
+  renderAll();
+});
+
+// Live search on typing (optional, remove if you prefer the Apply button only)
+qs('flt-text')?.addEventListener('input', renderAll);
+
+// ---- render function (existing) ----
 function renderBookings(bookings, containerId) {
   const container = document.getElementById(containerId);
   container.innerHTML = "";
@@ -263,7 +377,7 @@ function renderBookings(bookings, containerId) {
       "Unknown";
 
     const card = document.createElement("div");
-    card.className = "bg-white border border-gray-200 p-4 rounded-xl shadow-sm mb-4"; // updated classes
+    card.className = "bg-white border border-gray-200 p-4 rounded-xl shadow-sm mb-4";
     card.innerHTML = `
       <div class="flex justify-between items-center mb-2">
         <div>
@@ -281,15 +395,11 @@ function renderBookings(bookings, containerId) {
       <p class="text-sm text-gray-600 mb-1"><strong>Service:</strong> ${escapeHtml(booking.service)}</p>
       <p class="text-sm text-gray-600"><strong>Price Range:</strong> ${escapeHtml(booking.price_range)}</p>
     `;
-
-    // optional: clicking a card opens detail modal
     card.addEventListener('click', () => openBookingDetailModal(booking.booking_id));
     container.appendChild(card);
-
   });
 }
 
-// small helper to avoid injecting raw HTML
 function escapeHtml(str) {
   if (!str) return '';
   return String(str)
@@ -300,30 +410,25 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;');
 }
 
-// optional stub for modal - you can implement later
 function openBookingDetailModal(bookingId) {
-  // fetch detail via Ajax or use bookingsData to find booking & open modal
-  // Example: const b = bookingsData.find(x => x.booking_id == bookingId);
   console.log('Open details for booking', bookingId);
 }
 
-// finally render into the page
-renderBookings(upcomingBookings, "upcoming-bookings-content");
-renderBookings(pastBookings, "past-bookings-content");
-// Set default active tab on page load
+// Initial render
+renderAll();
+
+// Keep your existing tab setup (make Ongoing active by default)
 document.addEventListener("DOMContentLoaded", () => {
-    const ongoingBtn = document.querySelector('[data-tab="upcoming"]');
-    const completedBtn = document.querySelector('[data-tab="past"]');
+  const ongoingBtn = document.querySelector('[data-tab="upcoming"]');
+  const completedBtn = document.querySelector('[data-tab="past"]');
 
-    // Make "Ongoing Bookings" active
-    ongoingBtn.dataset.state = "active";
-    completedBtn.dataset.state = "";
+  ongoingBtn.dataset.state = "active";
+  completedBtn.dataset.state = "";
 
-    // Ensure upcoming content is visible and past content hidden
-    const upcomingContent = document.querySelector('[data-tab-content="upcoming"]');
-    const pastContent = document.querySelector('[data-tab-content="past"]');
-    upcomingContent.classList.remove("hidden");
-    pastContent.classList.add("hidden");
+  const upcomingContent = document.querySelector('[data-tab-content="upcoming"]');
+  const pastContent = document.querySelector('[data-tab-content="past"]');
+  upcomingContent.classList.remove("hidden");
+  pastContent.classList.add("hidden");
 });
 
 </script>

@@ -59,6 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | MBK GlamHub</title>
+  <link rel="icon" type="image/png" href="mbk_logo.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -96,8 +97,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
   </script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-lavender-50 via-lavender-100 to-lavender-200 flex items-center justify-center">
-        <div class="absolute top-4 left-4">
+<body
+  class="min-h-screen bg-gradient-to-br from-lavender-50 via-lavender-100 to-lavender-200 flex items-center justify-center relative opacity-0 translate-y-5"
+  onload="document.body.classList.add('slide-up-finish')"
+>     <div class="absolute top-4 left-4">
           <a href="homepage.php" class="text-plum-700 hover:text-plum-900 text-lg font-semibold flex items-center">
             <i class="fas fa-arrow-left mr-2 text-base"></i>
             Back
@@ -148,19 +151,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       </button>
     </form>
 
-    <div class="mt-6 text-center text-plum-700 text-sm">or sign in with</div>
 
-    <div class="flex flex-col space-y-3 mt-4">
-      <button class="flex items-center justify-center bg-[#1877F2] text-white py-3 rounded-lg font-medium hover:shadow-lg transition">
-        <i class="fab fa-facebook-f mr-2"></i> Continue with Facebook
-      </button>
-      <button class="flex items-center justify-center bg-[#DB4437] text-white py-3 rounded-lg font-medium hover:shadow-lg transition">
-        <i class="fab fa-google mr-2"></i> Continue with Google
-      </button>
-      <button class="flex items-center justify-center bg-black text-white py-3 rounded-lg font-medium hover:shadow-lg transition">
-        <i class="fab fa-apple mr-2"></i> Continue with Apple
-      </button>
-    </div>
+
 
     <div class="mt-6 text-center text-plum-700 text-sm">
       Don't have an account? <a href="signup.php" class="text-plum-500 hover:text-plum-700 hover:underline">Sign Up</a>
@@ -195,6 +187,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
   });
 </script>
+<style>
+    /* Smooth slide-up animation */
+    @keyframes softSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(25px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Apply animation once on load */
+    body.slide-up-finish {
+      animation: softSlideUp 0.6s ease-out forwards;
+    }
+  </style>
 </body>
 </html>
 

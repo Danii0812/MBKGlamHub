@@ -2,13 +2,17 @@
 session_start();
 
 include 'db.php';
-if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1; // Dummy user ID
-    $_SESSION['role'] = 'admin'; // Dummy role
-    $_SESSION['user_name'] = 'Admin User'; // Dummy user name
-}
+// prevent caching of authenticated pages
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: Sat, 26 Oct 1997 05:00:00 GMT');
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+require 'db.php';
+
+// ✅ DO NOT seed a dummy user here
+
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? null) !== 'admin') {
     header("Location: login.php");
     exit;
 }
@@ -21,7 +25,7 @@ $greetingName = $_SESSION['user_name'] ?? 'Admin';
     <meta charset="UTF-8" />
     <title>Manage Packages - Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Google Fonts -->
+    <link rel="icon" type="image/png" href="mbk_logo.png" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS with custom font and color config -->
     <script src="https://cdn.tailwindcss.com"></script>

@@ -1,18 +1,19 @@
 <?php
 session_start();
-// Dummy session variables for demonstration if not logged in
-if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1; // Dummy user ID
-    $_SESSION['role'] = 'admin'; // Dummy role
-    $_SESSION['user_name'] = 'Admin User'; // Dummy user name
-}
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: login.php");
+// Block caching on authenticated pages
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: Sat, 26 Oct 1997 05:00:00 GMT');
+
+// If not logged in or not admin, go to login
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
+    header('Location: login.php');
     exit;
 }
 
-$greetingName = $_SESSION['user_name'] ?? 'Admin';
+include 'db.php'; // now safe to include
 
 $message = '';
 $message_type = '';
@@ -22,9 +23,9 @@ $message_type = '';
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>User Reviews - Naive Bayes</title>
+    <title>Client Reviews</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Google Fonts -->
+    <link rel="icon" type="image/png" href="mbk_logo.png" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS with custom font and color config -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -192,98 +193,92 @@ $verifiedReviews = $verifiedStmt->fetchAll(PDO::FETCH_ASSOC);
                 <?php endif; ?>
             </div>
 
-            <!-- Verified Reviews (hidden by default) -->
-            <div id="verified-reviews" class="hidden">
-<div class="flex items-center gap-2 mb-4">
+<!-- Verified Reviews (hidden by default) -->
+<div id="verified-reviews" class="hidden">
+
+  <div class="flex items-center gap-2 mb-4">
     <span class="text-gray-700 font-medium">Filter by Stars:</span>
-    
-    <!-- ⭐ Star Filter -->
     <div id="star-filter" class="flex items-center gap-1 cursor-pointer">
-        <?php
+      <?php
         $selectedRating = isset($_GET['rating_filter']) ? intval($_GET['rating_filter']) : 0;
-        for ($i = 1; $i <= 5; $i++): 
-            $isSelected = $i <= $selectedRating;
-        ?>
-            <i class="fa fa-star text-xl <?= $isSelected ? 'text-yellow-400' : 'text-gray-300' ?>" 
-               data-value="<?= $i ?>"></i>
-        <?php endfor; ?>
+        for ($i = 1; $i <= 5; $i++):
+          $isSelected = $i <= $selectedRating;
+      ?>
+        <i class="fa fa-star text-xl <?= $isSelected ? 'text-yellow-400' : 'text-gray-300' ?>"
+           data-value="<?= $i ?>"></i>
+      <?php endfor; ?>
     </div>
 
-    <!-- 🧹 Show All Button -->
-    <button 
-        id="show-all-btn"
-        class="ml-4 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium px-3 py-1 rounded transition">
-        Show All Reviews
+    <button id="show-all-btn"
+      class="ml-4 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium px-3 py-1 rounded transition">
+      Show All Reviews
     </button>
-</div>
+  </div>
 
-</div>
-
-                <?php if (count($verifiedReviews) > 0): ?>
-                    <div class="bg-white rounded-xl shadow p-6">
-                        
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-lavender-100 text-gray-700">
-                                    <th class="p-3 rounded-tl-lg">Review ID</th>
-                                    <th class="p-3">User</th>
-                                    <th class="p-3">Booking ID</th>
-                                    <th class="p-3">Rating</th>
-                                    <th class="p-3">Comment</th>
-                                    <th class="p-3">Sentiment</th>
-                                    <th class="p-3 rounded-tr-lg">Created At</th>
-                                    <th class="p-3 rounded-tr-lg">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($verifiedReviews as $r): ?>
-                                    <tr class="border-b hover:bg-lavender-50 transition">
-                                        <td class="p-3"><?= htmlspecialchars($r['review_id']) ?></td>
-                                        <td class="p-3"><?= htmlspecialchars($r['first_name'] . ' ' . $r['last_name']) ?></td>
-                                        <td class="p-3"><?= htmlspecialchars($r['booking_id']) ?></td>
-                                        <td class="p-3 text-yellow-500">
-                                            <?php for ($i = 0; $i < $r['rating']; $i++): ?>
-                                                <i class="fa fa-star"></i>
-                                            <?php endfor; ?>
-                                        </td>
-                                        <td class="p-3 max-w-sm truncate"><?= htmlspecialchars($r['comment']) ?></td>
-                                        <td class="p-3 text-center">
-                                            <span class="px-2 py-1 text-xs rounded-full 
-                                                <?= $r['sentiment'] === 'positive' ? 'bg-green-100 text-green-700' : 
-                                                ($r['sentiment'] === 'negative' ? 'bg-red-100 text-red-700' : 
-                                                'bg-yellow-100 text-yellow-700') ?>">
-                                                <?= ucfirst($r['sentiment']) ?>
-                                            </span>
-                                        </td>
-                                        <td class="p-3">
-    <?php
-        $formattedDate = date("F d, Y h:i A", strtotime($r['created_at']));
-        echo htmlspecialchars($formattedDate);
-    ?>
-</td>
-
-<td class="p-3">
-    <?php if ($r['sentiment'] === 'neutral'): ?>
-        <button 
-            class="revert-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-sm transition"
-            data-id="<?= $r['review_id'] ?>">
-            Revert
-        </button>
-    <?php endif; ?>
-</td>
-
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="text-center bg-white p-8 rounded-xl shadow text-gray-600">
-                        <i class="fas fa-inbox text-4xl text-gray-400 mb-3"></i>
-                        <p class="text-lg font-semibold">No verified reviews yet.</p>
-                    </div>
+  <?php if (count($verifiedReviews) > 0): ?>
+    <div class="bg-white rounded-xl shadow p-6">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-lavender-100 text-gray-700">
+            <th class="p-3 rounded-tl-lg">Review ID</th>
+            <th class="p-3">User</th>
+            <th class="p-3">Booking ID</th>
+            <th class="p-3">Rating</th>
+            <th class="p-3">Comment</th>
+            <th class="p-3">Sentiment</th>
+            <th class="p-3">Created At</th>
+            <th class="p-3 rounded-tr-lg">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($verifiedReviews as $r): ?>
+            <tr class="border-b hover:bg-lavender-50 transition">
+              <td class="p-3"><?= htmlspecialchars($r['review_id']) ?></td>
+              <td class="p-3"><?= htmlspecialchars($r['first_name'] . ' ' . $r['last_name']) ?></td>
+              <td class="p-3"><?= htmlspecialchars($r['booking_id']) ?></td>
+              <td class="p-3 text-yellow-500">
+                <?php for ($i = 0; $i < $r['rating']; $i++): ?>
+                  <i class="fa fa-star"></i>
+                <?php endfor; ?>
+              </td>
+              <td class="p-3 max-w-sm truncate"><?= htmlspecialchars($r['comment']) ?></td>
+              <td class="p-3 text-center">
+                <span class="px-2 py-1 text-xs rounded-full 
+                  <?= $r['sentiment'] === 'positive' ? 'bg-green-100 text-green-700' :
+                    ($r['sentiment'] === 'negative' ? 'bg-red-100 text-red-700' :
+                    'bg-yellow-100 text-yellow-700') ?>">
+                  <?= ucfirst($r['sentiment']) ?>
+                </span>
+              </td>
+              <td class="p-3">
+                <?php
+                  $formattedDate = date("F d, Y h:i A", strtotime($r['created_at']));
+                  echo htmlspecialchars($formattedDate);
+                ?>
+              </td>
+              <td class="p-3">
+                <?php if ($r['sentiment'] === 'neutral'): ?>
+                  <button 
+                    class="revert-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-sm transition"
+                    data-id="<?= $r['review_id'] ?>">
+                    Revert
+                  </button>
                 <?php endif; ?>
-            </div>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  <?php else: ?>
+    <div class="text-center bg-white p-8 rounded-xl shadow text-gray-600">
+      <i class="fas fa-inbox text-4xl text-gray-400 mb-3"></i>
+      <p class="text-lg font-semibold">No verified reviews yet.</p>
+    </div>
+  <?php endif; ?>
+
+</div> <!-- ✅ Close AFTER the verified section -->
+
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>

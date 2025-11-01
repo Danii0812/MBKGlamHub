@@ -26,7 +26,7 @@ if (!$user) {
     <meta charset="UTF-8" />
     <title>Artist Profile</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Fonts, Tailwind, Font Awesome -->
+    <link rel="icon" type="image/png" href="mbk_logo.png" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -87,17 +87,7 @@ if (!$user) {
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col bg-white rounded-tl-3xl shadow-inner ml-64">
         <!-- Top Header / Navbar -->
-        <header class="bg-white p-6 flex items-center justify-between sticky top-0 z-10 border-b border-gray-100">
-            <div class="relative flex-1 max-w-lg">
-                <input type="text" placeholder="Search..." 
-                    class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-lavender-300">
-                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            </div>
 
-            <div class="flex items-center space-x-4 ml-6">
-    
-            </div>
-        </header>
 
         <!-- Profile Content -->
         <main class="flex-1 p-10 bg-white overflow-y-auto">

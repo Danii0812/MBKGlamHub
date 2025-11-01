@@ -19,9 +19,28 @@ $selected_time = $_SESSION['selected_time'] ?? null;
 
 // ❗ Don't check $selected_date before it's defined!
 if (!$team_id || !$selected_date || !$selected_time) {
-    echo "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><title>Missing Data</title><meta name='viewport' content='width=device-width, initial-scale=1.0'><script src='https://cdn.tailwindcss.com'></script></head><body class='flex items-center justify-center min-h-screen bg-red-50 text-red-600 text-xl font-body'><div class='bg-white p-8 rounded-xl shadow-lg border border-red-200 text-center'><h2 class='text-2xl font-bold text-red-700 mb-4'>Missing Selection Data</h2><p class='text-gray-700'>Please go back and select a date, time, and team.</p><a href='javascript:history.back();' class='mt-6 inline-block bg-red-100 text-red-700 font-medium px-4 py-2 rounded-lg hover:bg-red-200 transition'>Go Back</a></div></body></html>";
+    echo '<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Missing Data</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="min-h-screen bg-white text-gray-800 flex items-center justify-center">
+        <div class="bg-white p-8 rounded-xl shadow-lg border border-red-200 text-center max-w-md">
+            <h2 class="text-2xl font-bold text-red-700 mb-4">Missing Selection Data</h2>
+            <p class="text-gray-700 mb-6">Please go back and select a date, time, and team.</p>
+            <a href="javascript:history.back();" class="inline-block bg-red-100 text-red-700 font-medium px-6 py-3 rounded-lg hover:bg-red-200 transition">
+                Go Back
+            </a>
+        </div>
+    </body>
+    </html>';
     exit();
 }
+
+
 
 $_SESSION['selected_team_id'] = $team_id;
 
@@ -49,7 +68,8 @@ if ($conflict_result->num_rows > 0):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MBK GlamHub</title>
+  <link rel="icon" type="image/png" href="mbk_logo.png" />
+  <title>MBK GlamHub | Team Selection </title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>
@@ -104,19 +124,20 @@ if ($conflict_result->num_rows > 0):
     }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-lavender-50 via-lavender-100 to-lavender-200">
+<body class="min-h-screen bg-white text-gray-800">
+
 
 <!-- Header -->
 <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-lavender-200">
   <div class="container mx-auto px-4 py-4">
     <div class="flex items-center justify-between">
     <div class="flex items-center space-x-2">
-      <a href="homepage.php"><img src="logo.png" alt="Make up By Kyleen Logo" class="h-10 w-auto"></a>
+      <a href="homepage.php"><img src="mbk_logo.png" alt="Make up By Kyleen Logo" class="h-10 w-auto"></a>
     </div>
 
       <nav class="hidden md:flex items-center space-x-8">
-        <a href="#services" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Services</a>
-        <a href="#about" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">About</a>
+        <a href="services.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Services</a>
+        <a href="homepage.php#about" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">About</a>
         <a href="artist_portfolio.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Portfolio</a>
         <a href="reviews.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Reviews</a>
 <!-- Dropdown Menu Container -->
@@ -146,23 +167,51 @@ if ($conflict_result->num_rows > 0):
 </header>
 
     <div class="flex-1 flex flex-col items-center justify-center p-4">
-        <!-- Step Indicator -->
-        <div class="mb-8 flex items-center justify-center space-x-8 text-gray-500 font-semibold">
-            <div class="flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center text-white text-lg font-bold mb-2 shadow-md">
-                    <i class="fas fa-check"></i>
-                </div>
-                <span class="text-gray-700">Booking Details</span>
-            </div>
-            <div class="flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center text-white text-lg font-bold mb-2 shadow-md">2</div>
-                <span class="text-plum-700 font-bold">Team Selection</span>
-            </div>
-            <div class="flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 text-lg font-bold mb-2">3</div>
-                <span>Confirmation</span>
-            </div>
-        </div>
+           <!-- Step Indicator (Gradient Circles + Short Dividers) -->
+<div class="mb-10 flex items-center justify-center text-gray-600 font-semibold">
+  <!-- Step 1: Completed -->
+  <div class="flex flex-col items-center">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-plum-500 to-lavender-400 flex items-center justify-center text-white text-lg font-bold mb-2 shadow-lg ring-4 ring-lavender-200/50">
+      <i class="fas fa-check"></i>
+    </div>
+    <span class="text-plum-700 font-bold">Booking Details</span>
+  </div>
+
+  <!-- Divider -->
+  <div class="w-10 h-1 bg-gradient-to-r from-lavender-300 to-lavender-100 mx-3 rounded-full"></div>
+
+  <!-- Step 2: Active -->
+  <div class="flex flex-col items-center">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-plum-500 to-lavender-400 flex items-center justify-center text-white text-lg font-bold mb-2 shadow-lg ring-4 ring-lavender-200/50">
+      2
+    </div>
+    <span class="text-plum-700 font-bold">Team Selection</span>
+  </div>
+
+  <!-- Divider -->
+  <div class="w-10 h-1 bg-gradient-to-r from-lavender-300 to-lavender-100 mx-3 rounded-full"></div>
+
+  <!-- Step 3: Inactive -->
+  <div class="flex flex-col items-center opacity-90">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-gray-200 to-gray-100 flex items-center justify-center text-gray-600 text-lg font-bold mb-2 shadow-inner border border-lavender-200">
+      3
+    </div>
+    <span class="text-gray-600 font-medium">Select Package</span>
+  </div>
+
+  <!-- Divider -->
+  <div class="w-10 h-1 bg-gradient-to-r from-lavender-300 to-lavender-100 mx-3 rounded-full"></div>
+
+  <!-- Step 4: Inactive -->
+  <div class="flex flex-col items-center opacity-90">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-gray-200 to-gray-100 flex items-center justify-center text-gray-600 text-lg font-bold mb-2 shadow-inner border border-lavender-200">
+      4
+    </div>
+    <span class="text-gray-600 font-medium">Confirmation</span>
+  </div>
+</div>
+
+
 
         <main class="w-full max-w-xl p-8 bg-white rounded-xl shadow-lg border border-red-200 text-center">
             <h2 class="text-3xl font-heading font-bold text-red-700 mb-4">Team Unavailable</h2>
@@ -219,7 +268,8 @@ if ($row = $result->fetch_assoc()):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MBK GlamHub</title>
+ <link rel="icon" type="image/png" href="mbk_logo.png" />
+  <title>MBK GlamHub | Team Selection </title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>
@@ -274,19 +324,20 @@ if ($row = $result->fetch_assoc()):
     }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-lavender-50 via-lavender-100 to-lavender-200">
+<body class="min-h-screen bg-white text-gray-800">
+
 
 <!-- Header -->
 <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-lavender-200">
   <div class="container mx-auto px-4 py-4">
     <div class="flex items-center justify-between">
     <div class="flex items-center space-x-2">
-      <a href="homepage.php"><img src="logo.png" alt="Make up By Kyleen Logo" class="h-10 w-auto"></a>
+      <a href="homepage.php"><img src="mbk_logo.png" alt="Make up By Kyleen Logo" class="h-10 w-auto"></a>
     </div>
 
       <nav class="hidden md:flex items-center space-x-8">
-        <a href="#services" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Services</a>
-        <a href="#about" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">About</a>
+        <a href="services.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Services</a>
+        <a href="homepage.php#about" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">About</a>
         <a href="artist_portfolio.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Portfolio</a>
         <a href="reviews.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Reviews</a>
 <!-- Dropdown Menu Container -->
@@ -315,51 +366,51 @@ if ($row = $result->fetch_assoc()):
   </div>
 </header>
       <div class="flex-1 flex flex-col items-center justify-center p-4">
-        <!-- Step Indicator -->
-        <div class="mb-8 flex items-center justify-center gap-2 text-gray-500 font-semibold">
-          
-          <!-- Step 1 -->
-          <div class="flex flex-col items-center">
-            <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white text-lg font-bold mb-2 shadow-md">
-              <i class="fas fa-check"></i>
-            </div>
-            <span class="text-green-700 font-bold">Booking Details</span>
-          </div>
+<!-- Step Indicator (Gradient Circles + Short Dividers) -->
+<div class="mb-10 flex items-center justify-center text-gray-600 font-semibold">
+  <!-- Step 1: Completed -->
+  <div class="flex flex-col items-center">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-plum-500 to-lavender-400 flex items-center justify-center text-white text-lg font-bold mb-2 shadow-lg ring-4 ring-lavender-200/50">
+      <i class="fas fa-check"></i>
+    </div>
+    <span class="text-plum-700 font-bold">Booking Details</span>
+  </div>
 
-          <!-- Line -->
-          <div class="flex-1 h-1 bg-gray-300 mx-2 mt-3"></div>
+  <!-- Divider -->
+  <div class="w-10 h-1 bg-gradient-to-r from-lavender-300 to-lavender-100 mx-3 rounded-full"></div>
 
-          <!-- Step 2 -->
-          <div class="flex flex-col items-center">
-            <div class="w-10 h-10 rounded-full bg-plum-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
-              2
-            </div>
-            <span class="text-plum-700 font-bold">Team Selection</span>
-          </div>
+  <!-- Step 2: Active -->
+  <div class="flex flex-col items-center">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-plum-500 to-lavender-400 flex items-center justify-center text-white text-lg font-bold mb-2 shadow-lg ring-4 ring-lavender-200/50">
+      2
+    </div>
+    <span class="text-plum-700 font-bold">Team Selection</span>
+  </div>
 
-          <!-- Line -->
-          <div class="flex-1 h-1 bg-gray-300 mx-2 mt-3"></div>
+  <!-- Divider -->
+  <div class="w-10 h-1 bg-gradient-to-r from-lavender-300 to-lavender-100 mx-3 rounded-full"></div>
 
-          <!-- Step 3 -->
-          <div class="flex flex-col items-center">
-            <div class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 text-lg font-bold mb-2">
-              3
-            </div>
-            <span class="text-gray-600 font-medium">Select Package</span>
-          </div>
+  <!-- Step 3: Inactive -->
+  <div class="flex flex-col items-center opacity-90">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-gray-200 to-gray-100 flex items-center justify-center text-gray-600 text-lg font-bold mb-2 shadow-inner border border-lavender-200">
+      3
+    </div>
+    <span class="text-gray-600 font-medium">Select Package</span>
+  </div>
 
-          <!-- Line -->
-          <div class="flex-1 h-1 bg-gray-300 mx-2 mt-3"></div>
+  <!-- Divider -->
+  <div class="w-10 h-1 bg-gradient-to-r from-lavender-300 to-lavender-100 mx-3 rounded-full"></div>
 
-          <!-- Step 4 -->
-          <div class="flex flex-col items-center">
-            <div class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 text-lg font-bold mb-2">
-              4
-            </div>
-            <span class="text-gray-600 font-medium">Confirmation</span>
-          </div>
+  <!-- Step 4: Inactive -->
+  <div class="flex flex-col items-center opacity-90">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-gray-200 to-gray-100 flex items-center justify-center text-gray-600 text-lg font-bold mb-2 shadow-inner border border-lavender-200">
+      4
+    </div>
+    <span class="text-gray-600 font-medium">Confirmation</span>
+  </div>
+</div>
 
-        </div>
+
 
         <main class="w-full max-w-xl p-8 bg-white rounded-xl shadow-lg border border-lavender-100">
     <h2 class="text-3xl font-heading font-bold text-center text-plum-700 mb-6">
@@ -439,7 +490,8 @@ if ($row = $result->fetch_assoc()):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MBK GlamHub</title>
+  <link rel="icon" type="image/png" href="mbk_logo.png" />
+  <title>MBK GlamHub | Team Selection </title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>
@@ -494,19 +546,20 @@ if ($row = $result->fetch_assoc()):
     }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-lavender-50 via-lavender-100 to-lavender-200">
+<body class="min-h-screen bg-white text-gray-800">
+
 
 <!-- Header -->
 <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-lavender-200">
   <div class="container mx-auto px-4 py-4">
     <div class="flex items-center justify-between">
     <div class="flex items-center space-x-2">
-      <a href="homepage.php"><img src="logo.png" alt="Make up By Kyleen Logo" class="h-10 w-auto"></a>
+      <a href="homepage.php"><img src="mkb_logo.png" alt="Make up By Kyleen Logo" class="h-10 w-auto"></a>
     </div>
 
       <nav class="hidden md:flex items-center space-x-8">
-        <a href="#services" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Services</a>
-        <a href="#about" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">About</a>
+        <a href="services.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Services</a>
+        <a href="homepage.php#about" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">About</a>
         <a href="artist_portfolio.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Portfolio</a>
         <a href="reviews.php" class="text-gray-700 hover:text-plum-600 transition-colors font-medium">Reviews</a>
 <!-- Dropdown Menu Container -->
@@ -537,23 +590,53 @@ if ($row = $result->fetch_assoc()):
 
 
     <div class="flex-1 flex flex-col items-center justify-center p-4">
-        <!-- Step Indicator -->
-        <div class="mb-8 flex items-center justify-center space-x-8 text-gray-500 font-semibold">
-            <div class="flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center text-white text-lg font-bold mb-2 shadow-md">
-                    <i class="fas fa-check"></i>
-                </div>
-                <span class="text-gray-700">Booking Details</span>
-            </div>
-            <div class="flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center text-white text-lg font-bold mb-2 shadow-md">2</div>
-                <span class="text-plum-700 font-bold">Team Selection</span>
-            </div>
-            <div class="flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 text-lg font-bold mb-2">3</div>
-                <span>Confirmation</span>
-            </div>
-        </div>
+<!-- Step Indicator (Gradient Circles + Short Dividers) -->
+<div class="mb-10 flex items-center justify-center text-gray-600 font-semibold">
+  <!-- Step 1: Completed -->
+  <div class="flex flex-col items-center">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-plum-500 to-lavender-400 flex items-center justify-center text-white text-lg font-bold mb-2 shadow-lg ring-4 ring-lavender-200/50">
+      <i class="fas fa-check"></i>
+    </div>
+    <span class="text-plum-700 font-bold">Booking Details</span>
+  </div>
+
+  <!-- Divider -->
+  <div class="w-10 h-1 bg-gradient-to-r from-lavender-300 to-lavender-100 mx-3 rounded-full"></div>
+
+  <!-- Step 2: Active -->
+  <div class="flex flex-col items-center">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-plum-500 to-lavender-400 flex items-center justify-center text-white text-lg font-bold mb-2 shadow-lg ring-4 ring-lavender-200/50">
+      2
+    </div>
+    <span class="text-plum-700 font-bold">Team Selection</span>
+  </div>
+
+  <!-- Divider -->
+  <div class="w-10 h-1 bg-gradient-to-r from-lavender-300 to-lavender-100 mx-3 rounded-full"></div>
+
+  <!-- Step 3: Inactive -->
+  <div class="flex flex-col items-center opacity-90">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-gray-200 to-gray-100 flex items-center justify-center text-gray-600 text-lg font-bold mb-2 shadow-inner border border-lavender-200">
+      3
+    </div>
+    <span class="text-gray-600 font-medium">Select Package</span>
+  </div>
+
+  <!-- Divider -->
+  <div class="w-10 h-1 bg-gradient-to-r from-lavender-300 to-lavender-100 mx-3 rounded-full"></div>
+
+  <!-- Step 4: Inactive -->
+  <div class="flex flex-col items-center opacity-90">
+    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-gray-200 to-gray-100 flex items-center justify-center text-gray-600 text-lg font-bold mb-2 shadow-inner border border-lavender-200">
+      4
+    </div>
+    <span class="text-gray-600 font-medium">Confirmation</span>
+  </div>
+</div>
+
+
+
+
 
         <main class="w-full max-w-xl p-8 bg-white rounded-xl shadow-lg border border-red-200 text-center">
             <h2 class="text-3xl font-heading font-bold text-red-700 mb-4">Team Not Found</h2>
@@ -563,6 +646,13 @@ if ($row = $result->fetch_assoc()):
             </a>
         </main>
     </div>
+    
 </body>
+<style>
+  .gradient-bg { background: linear-gradient(to right, #a06c9e, #4b2840); }
+  .gradient-bg:hover { background: linear-gradient(to right, #804f7e, #673f68); }
+  html { scroll-behavior: smooth; }
+</style>
+
 </html>
 <?php endif; ?>
